@@ -2,7 +2,7 @@
 #include <QDebug>
 
 /*! the parameter number pass by command line*/
-const int PARAMER_COUNT = 4+1;
+const int PARAMER_COUNT = 1+3;
 
 int main(int argc, char *argv[])
 {
@@ -11,7 +11,9 @@ int main(int argc, char *argv[])
     if(PARAMER_COUNT == argc)
     {
         //accept
-        qDebug() << "accept";
+		QString fileName = argv[1];
+		QString board = argv[2];
+		QString serialPort = argv[3];
     }
     else
     {
