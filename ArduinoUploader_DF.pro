@@ -20,19 +20,15 @@ INCLUDEPATH += ./QExtserialport
 include(./QExtserialport/qextserialport.pri)
 
 SOURCES += main.cpp \
-    UploadFactory.cpp \
-    UploadBase.cpp \
-    Uploader_Mac.cpp \
-    Uploader_Linux.cpp \
-    Uploader_Windows.cpp
+	UploadFactory.cpp \
+	UploadBase.cpp \
+	Uploader_Mac.cpp \
+	Uploader_Linux.cpp \
+	Uploader_Windows.cpp
 
 HEADERS += \
-    UploadFactory.h \
-    UploadBase.h \
-    Uploader_Mac.h \
-    Uploader_Linux.h \
-    Uploader_Windows.h \
-    UploadBase_p.h \
-    Uploader_p.h \
-    UploadFactory_p.h \
-    d_pointer.h
+	UploadFactory.h \
+	UploadBase.h \
+	Uploader_Mac.h \
+	Uploader_Linux.h \
+	Uploader_Windows.h

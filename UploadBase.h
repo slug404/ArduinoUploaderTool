@@ -1,26 +1,26 @@
 #ifndef UPLOADBASE_H
 #define UPLOADBASE_H
 
-class UploadBasePrivate;
 #include <QObject>
-#include "d_pointer.h"
 
 /*!
  * \brief The UploadBase class is baseclass for the uploader
  */
 class UploadBase : public QObject
 {
-	Q_OBJECT
-	DPTR_DECLARE_PRIVATE(UploadBase)
+    Q_OBJECT
 public:
-	explicit UploadBase(QObject *parent = 0);
-	
+    void start();
+
 signals:
-	
+
 public slots:
 
-private:
-	DPTR_DECLARE(UploadBase)
+protected:
+    explicit UploadBase(QObject *parent = 0);
+    virtual ~UploadBase();
+
+protected:
 };
 
 #endif // UPLOADBASE_H
