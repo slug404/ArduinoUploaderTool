@@ -69,18 +69,21 @@ bool UploadBase::copyFile(const QString &srcPath, const QString &desPath)
 /**
  * @brief 根据传入的文件路径获取该文件所使用到的库所有库的名字(包括库中包含其他库的所有情况)
  * @param filePath [in] 文件路径
- * @return 所有文件的路径
- * @note 返回值需要判断isEmpty
+ * @return 文件引用信息
+ * - -1 文件名
+ * - -2 文件路径
+ * - -3 包含的所有头文件的路径
  */
-QSet<QString> UploadBase::getReferenceLibrarysName(const QString filePath)
+LibraryReferenceInfor UploadBase::getReferenceLibrarysInformation(const QString filePath)
 {
+    LibraryReferenceInfor libRefInforInfor;
     QSet<QString> libReference;
     QFile file(filePath);
     if(!file.open(QFile::ReadOnly))
     {
         qDebug() << file.errorString();
         file.close();
-        return libReference;// return a empty object
+        return libRefInforInfor;
     }
 
     QString code = file.readAll();
@@ -93,19 +96,21 @@ QSet<QString> UploadBase::getReferenceLibrarysName(const QString filePath)
     else
     {
         QList<QString> list = libReference.toList();
+        qDebug() << map_libName_infor_.keys();
         for(int i = 0; i != list.size(); ++i)
         {
             if(map_libName_infor_.contains(list.at(i)))
             {
-                LibraryReferenceInfor libRefInfor = map_libName_infor_.value(list.at(i));
-                libReference += libRefInfor.libReference;
+                libRefInforInfor.libReference += map_libName_infor_.value(list.at(i)).libReference;
             }
         }
     }
 
     file.close();
+    libRefInforInfor.libName = filePath.right(filePath.size() - filePath.lastIndexOf("/") - 1);
+    libRefInforInfor.libPath = filePath;
 
-    return libReference;
+    return libRefInforInfor;
 }
 
 /**
@@ -167,7 +172,7 @@ void UploadBase::initLibrarysInfor(const QString libraryPath)
         libReferInfor.libPath = dirPath;
         libReferInfor.libReference = library;
 
-        map_libName_infor_[dirName] = libReferInfor;
+        map_libName_infor_[dirName + ".h"] = libReferInfor;
     }
 }
 

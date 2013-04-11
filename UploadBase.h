@@ -26,7 +26,7 @@ class UploadBase : public QObject
 public:
     //扫描库相关
     void initLibrarysInfor(const QString libraryPath);
-    QSet<QString> getReferenceLibrarysName(const QString filePath);
+    LibraryReferenceInfor getReferenceLibrarysInformation(const QString filePath);
     QSet<QString> getAllMatchResults(const QString text, const QString regexp);
 
     //复制库相关
