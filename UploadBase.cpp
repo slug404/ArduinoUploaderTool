@@ -74,7 +74,18 @@ bool UploadBase::copyFile(const QString &srcPath, const QString &desPath)
  */
 QSet<QString> UploadBase::getReferenceLibrarysName(const QString filePath)
 {
-    QSet<QString> libReference = findReferenceLibraryName(filePath);
+    QSet<QString> libReference;
+    QFile file(filePath);
+    if(!file.open(QFile::ReadOnly))
+    {
+        qDebug() << file.errorString();
+        file.close();
+        return libReference;// return a empty object
+    }
+
+    QString code = file.readAll();
+
+    libReference = getAllMatchResults(code, "\\w+\\.h");
     if(libReference.isEmpty())
     {
         qDebug() << "reference library is empty";
@@ -84,55 +95,79 @@ QSet<QString> UploadBase::getReferenceLibrarysName(const QString filePath)
         QList<QString> list = libReference.toList();
         for(int i = 0; i != list.size(); ++i)
         {
-            if(list.at(i))
+            if(map_libName_infor_.contains(list.at(i)))
             {
-                //libReference << ;
+                LibraryReferenceInfor libRefInfor = map_libName_infor_.value(list.at(i));
+                libReference += libRefInfor.libReference;
             }
         }
-    }
-}
-
-/**
- * @brief UploadBase::findReferenceLibraryName
- * @param filePath
- * @return
- */
-QSet<QString> UploadBase::findReferenceLibraryName(const QString filePath)
-{
-    QSet<QString> setNames;
-
-    QFile file(filePath);
-    if(!file.open(QFile::ReadOnly))
-    {
-        qDebug() << file.errorString();
-        return setNames;// return a empty object
-    }
-
-    QString code = file.readAll();
-    QRegExp rx("\\w+\\.h");
-
-    int count = 0;
-    int pos = 0;
-
-    while ((pos = rx.indexIn(code, pos)) != -1)
-    {
-        ++count;
-        pos += rx.matchedLength();
-        QString result = rx.cap(0);
-        setNames << result;
     }
 
     file.close();
 
-    return setNames;
+    return libReference;
+}
+
+/**
+ * @brief 获取所有的匹配结果
+ * @param text 要匹配的文本
+ ** @param regexp 正则表达式串
+ * @return 匹配的结果集
+ */
+QSet<QString> UploadBase::getAllMatchResults(const QString text, const QString regexp)
+{
+    QSet<QString> resultSet;
+
+    QRegExp rx(regexp);
+    int pos = 0;
+
+    while ((pos = rx.indexIn(text, pos)) != -1)
+    {
+        pos += rx.matchedLength();
+        QString result = rx.cap(0);
+        resultSet << result;
+    }
+
+    return resultSet;
 }
 
 /**
  * @brief 初始化给定的路径中的库的引用信息
- * @param libraryPath [in] 路径
+ * @param libraryPath [in] 路径, 需要指定到Arduino的libraries所在路径
  */
 void UploadBase::initLibrarysInfor(const QString libraryPath)
 {
+    QDir dir(libraryPath);
+    dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot); // filter . and ..
 
+    foreach (const QString dirName, dir.entryList())
+    {
+        QString dirPath = libraryPath + "/" + dirName + "/" + dirName + ".h";
+        QFile file(dirPath);
+
+        if(!file.open(QFile::ReadOnly))
+        {
+            qDebug() << "can't open file in path: " << dirPath;
+            file.close();
+            continue;
+        }
+
+        QString code = file.readAll();
+        QSet<QString> library = getAllMatchResults(code, "\\w+\\.h");
+
+        if(library.isEmpty())
+        {
+            qDebug() << tr("file: %1").arg(dirName) <<"not have include other library";
+            file.close();
+            continue;
+        }
+
+        LibraryReferenceInfor libReferInfor;
+        libReferInfor.libName = dirName;
+        libReferInfor.libPath = dirPath;
+        libReferInfor.libReference = library;
+
+        map_libName_infor_[dirName] = libReferInfor;
+    }
 }
 

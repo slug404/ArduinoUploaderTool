@@ -5,6 +5,7 @@
 #include <QSharedPointer>
 #include <QProcess>
 #include <QSet>
+#include <QMap>
 
 /**
  * @brief 库引用信息
@@ -24,8 +25,9 @@ class UploadBase : public QObject
     Q_OBJECT
 public:
     //扫描库相关
+    void initLibrarysInfor(const QString libraryPath);
     QSet<QString> getReferenceLibrarysName(const QString filePath);
-    QSet<QString> findReferenceLibraryName(const QString filePath);
+    QSet<QString> getAllMatchResults(const QString text, const QString regexp);
 
     //复制库相关
     bool copyDirectory(const QString &srcPath, const QString &desPath);
