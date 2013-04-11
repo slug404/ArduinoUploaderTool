@@ -7,7 +7,7 @@
 QT       += core
 QT       -= gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QMAKE_CXXFLAGS += -std=gnu++0x
+greaterThan(QT_MAJOR_VERSION, 4): QMAKE_CXXFLAGS += -std=c++0x
 equals(QT_MAJOR_VERSION, 5): CONFIG += c++11
 
 TARGET = ArduinoUploader_DF
