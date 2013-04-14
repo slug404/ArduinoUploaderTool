@@ -59,7 +59,7 @@ void UploadBase::copyDirectory(const QString &srcPath, const QString &desPath)
             QString desFilePath = srcPath + "/" + fileName;
             if(!copyFile(srcFilePath, desFilePath))
             {
-                qDebug() << "copy file error! from " << srcFilePath << "to " << desFilePath;`
+                qDebug() << "copy file error! from " << srcFilePath << "to " << desFilePath;
             }
         }
     }
@@ -138,12 +138,13 @@ bool UploadBase::copyFile(const QString &srcPath, const QString &desPath)
 /**
  * @brief 根据传入的文件路径获取该文件所使用到的库所有库的名字(包括库中包含其他库的所有情况)
  * @param filePath [in] 文件路径
+ * @param libPaths [out] 库路径
  * @return 文件引用信息
  * - -1 文件名
  * - -2 文件路径
  * - -3 包含的所有头文件的路径
  */
-LibraryReferenceInfor UploadBase::getReferenceLibrarysInformation(const QString filePath)
+LibraryReferenceInfor UploadBase::getReferenceLibrarysInformation(const QString filePath, QSet<QString> &libPaths)
 {
     LibraryReferenceInfor libRefInforInfor;
     QSet<QString> libReference;
@@ -171,6 +172,7 @@ LibraryReferenceInfor UploadBase::getReferenceLibrarysInformation(const QString 
             if(map_libName_infor_.contains(list.at(i)))
             {
                 libRefInforInfor.libReference += map_libName_infor_.value(list.at(i)).libReference;
+                libPaths += map_libName_infor_.value(list.at(i)).libPath;
             }
         }
     }
