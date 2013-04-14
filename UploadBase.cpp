@@ -48,9 +48,36 @@ UploadBase::~UploadBase()
  * @retval true 执行成功
  * @retval false 执行失败
  */
-bool UploadBase::copyDirectory(const QString &srcPath, const QString &desPath)
+void UploadBase::copyDirectory(const QString &srcPath, const QString &desPath)
 {
-
+    QDir dir(srcPath);
+    {
+        dir.setFilter(QDir::Files);
+        foreach (const QString &fileName, dir.entryList())
+        {
+            QString srcFilePath = srcPath + "/" + fileName;
+            QString desFilePath = srcPath + "/" + fileName;
+            if(!copyFile(srcFilePath, desFilePath))
+            {
+                qDebug() << "copy file error! from " << srcFilePath << "to " << desFilePath;`
+            }
+        }
+    }
+    dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+    QStringList dirNames = dir.entryList();
+    if(dirNames.isEmpty())
+    {
+        return;
+    }
+    else
+    {
+        foreach (const QString &dirName, dirNames)
+        {
+            QString newSrcPath = srcPath + "/" + dirName;
+            QString newDesPath = desPath + "/" + dirName;
+            copyDirectory(newSrcPath, newDesPath);
+        }
+    }
 }
 
 /**
@@ -63,7 +90,49 @@ bool UploadBase::copyDirectory(const QString &srcPath, const QString &desPath)
  */
 bool UploadBase::copyFile(const QString &srcPath, const QString &desPath)
 {
+    //读数据
+    QFile file(srcPath);
+    if(!file.open(QFile::ReadOnly))
+    {
+        qDebug() << "open src file fail" << srcPath;
+        return false;
+    }
 
+    QByteArray bytes =  file.readAll();
+    file.close();
+
+    ////////////////////////////////
+    //在这里要确保path可用
+    {
+        QDir pathTest("./");
+        QString oldPath = pathTest.currentPath();
+
+        pathTest.setPath(desPath);
+        if(!pathTest.exists())
+        {
+            qDebug() << "not exists the path, and it will try to cerate it:" << desPath;
+            if(!pathTest.mkpath(desPath))
+            {
+                qDebug() << "create path fail!!!!";
+                return false;
+            }
+        }
+        pathTest.setPath(oldPath);
+    }
+    ////////////////////////////////
+
+    QFile desFile(desPath);
+    if(!desFile.open(QFile::WriteOnly))
+    {
+        qDebug() << "open des file fail " << desPath;
+        return false;
+    }
+
+    desFile.write(bytes);
+    desFile.waitForBytesWritten(10);
+    desFile.close();
+
+    return true;
 }
 
 /**
