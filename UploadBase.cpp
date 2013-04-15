@@ -13,6 +13,8 @@ UploadBase::UploadBase(QObject *parent)
     , compilerPath_("")
     , codePath_("")
     , cmd_("")
+    , compiler_c("")
+    , compiler_cplusplus("")
 {
 }
 
@@ -32,12 +34,129 @@ UploadBase::UploadBase(const QString &serial, const QString &board, QObject *par
     , compilerPath_("")
     , codePath_("")
     , cmd_("")
+    , compiler_c("")
+    , compiler_cplusplus("")
 {
-
 }
 
 UploadBase::~UploadBase()
 {
+}
+
+QString UploadBase::getCompilerCommand(const QString &filePath, const QString &cpuType, const QList<QString> &libPaths, QString workPath, QString workingFrequency)
+{
+    QFileInfo infor(filePath);
+    QString suffix = infor.suffix();
+    QString cmd;
+    if("c" == suffix
+            || "C" == suffix)
+    {
+        cmd = QString("%1/avr-gcc -c -g -Os -Wall -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3L -MMD -DUSB_VID=null -DARDUINO=103 ").arg("C:/arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency);
+    }
+    else if("cpp" == suffix
+            || "CPP" == suffix)
+    {
+        cmd = QString("%1/avr-g++ -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3L -MMD -DUSB_VID=null -DUSB_PID=null -DARDUINO=103 ").arg("C:/arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency);
+    }
+    else
+    {
+        return QString();
+    }
+
+    cmd += "-IC:/arduino/hardware/arduino/cores/arduino ";
+    cmd += "-IC:/arduino/hardware/arduino/variants/standard ";
+
+    for(int i = 0; i != libPaths.size(); ++i)
+    {
+        cmd += QString("-I")+libPaths.at(i) + " ";
+    }
+    //这里结构测试的时候再仔细考虑一下
+    cmd += QString(filePath + " -o "  +workPath + "/" + infor.fileName() + ".o");
+
+    return cmd;
+}
+
+/**
+ * @brief 扔一个文件路径, 设置好它引用的库的目录路径以及库的文件路径
+ * @param [in] filePath 文件路径
+ * @param [out] libDirPath 引用库的目录路径
+ * @param [out] libFilePath 引用库的文件路径
+ */
+void UploadBase::getLibraryPath(const QString &filePath, QList<QString> &libDirPath, QList<QString> &libFilePath)
+{
+    QSet<QString> tmp;
+    getReferenceLibrarysInformation(filePath, tmp);
+
+    libFilePath = tmp.toList();
+
+    for(int i = 0; i != libFilePath.size(); ++i)
+    {
+        libDirPath += QFileInfo(libFilePath.at(i)).path();
+    }
+}
+
+void UploadBase::compileTest(const QString &filePath, const QString &cpuType, QString workPath, QString workingFrequency)
+{
+    QList<QString> tmplibDirPath;
+    QList<QString> tmplibFilePath;
+    getLibraryPath(filePath, tmplibDirPath, tmplibFilePath);
+
+    //编译本文件
+    QString cmd = getCompilerCommand(filePath, cpuType, tmplibDirPath, workPath, workingFrequency);
+    qDebug() << cmd;
+
+    //递归编译其他引用
+    if(!tmplibFilePath.isEmpty())
+    {
+        for(int i = 0; i != tmplibFilePath.size(); ++i)
+        {
+            QString filePath = tmplibFilePath.at(i);
+            compileTest(filePath, cpuType);
+        }
+    }
+    else
+    {
+        return;
+    }
+}
+
+/**
+ * @brief 递归编译指定库目录中的所有*c,*cpp
+ * @param libraryDirPath 库目录路径
+ */
+void UploadBase::compileLibrary(const QString libraryDirPath)
+{
+    QDir dir(libraryDirPath);
+    QStringList filters;
+    filters << "*.cpp" << "*.CPP" << "*.cxx" << "*.cc" << "*.c" << "*.C";
+    dir.setNameFilters(filters);
+
+    foreach (const QString &fileName, dir.entryList())
+    {
+        QString filePath = libraryDirPath + "/" + fileName;
+        QList<QString> tmplibDirPath;
+        QList<QString> tmplibFilePath;
+        getLibraryPath(filePath, tmplibDirPath, tmplibFilePath);
+
+        //编译本文件
+        QString cmd = getCompilerCommand(filePath, "atmega328p", tmplibDirPath);
+        qDebug() << cmd;
+    }
+
+    //递归遍历子目录
+    dir.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
+    QStringList dirNames = dir.entryList();
+    if(dirNames.isEmpty())
+    {
+        return;
+    }
+    else
+    {
+        foreach (const QString &dirName, dirNames)
+        {
+            compileLibrary(libraryDirPath + "/" + dirName);
+        }
+    }
 }
 
 /**
@@ -166,14 +285,13 @@ LibraryReferenceInfor UploadBase::getReferenceLibrarysInformation(const QString 
     else
     {
         QList<QString> list = libReference.toList();
-        qDebug() << map_libName_infor_.keys();
+        //qDebug() << map_libName_infor_.keys();
         for(int i = 0; i != list.size(); ++i)
         {
             if(map_libName_infor_.contains(list.at(i)))
             {
                 libRefInforInfor.libReference += map_libName_infor_.value(list.at(i)).libReference;
-                QFileInfo infor(map_libName_infor_.value(list.at(i)).libPath);
-                libPaths += infor.path();
+                libPaths += map_libName_infor_.value(list.at(i)).libPath;
             }
         }
     }

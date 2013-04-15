@@ -11,7 +11,22 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     Uploader_Windows test;
     test.initLibrarysInfor("c:/arduino/libraries");
-    LibraryReferenceInfor bb = test.getReferenceLibrarysInformation("./Test/test.ino");
+
+    //QSet<QString> libPaths;
+    //LibraryReferenceInfor bb = test.getReferenceLibrarysInformation("./test.cpp", libPaths);
+    //test.compileTest("./test.cpp", "atmega328p");
+    //编译自己
+
+    QList<QString> tmpLibDirPath;
+    QList<QString> tmpLibFilePath;
+    test.getLibraryPath("CardInfo.cpp", tmpLibDirPath, tmpLibFilePath);
+     QString cmd = test.getCompilerCommand("CardInfo.cpp", "atmega328p", tmpLibDirPath);
+
+
+    foreach (const QString &dirPath, tmpLibDirPath)
+    {
+        test.compileLibrary(dirPath);
+    }
 
     if(PARAMER_COUNT == argc)
     {

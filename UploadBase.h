@@ -9,7 +9,6 @@
 
 
 
-
 /**
  * @brief 库引用信息
  */
@@ -29,12 +28,23 @@ class UploadBase : public QObject
 public:
     //扫描库相关
     void initLibrarysInfor(const QString libraryPath);
+    //在这里得到所有的依赖
     LibraryReferenceInfor getReferenceLibrarysInformation(const QString filePath, QSet<QString> &libPaths);
     QSet<QString> getAllMatchResults(const QString text, const QString regexp);
 
     //复制库相关
     void copyDirectory(const QString &srcPath, const QString &desPath);
     bool copyFile(const QString &srcPath, const QString &desPath);
+
+    void compileTest(const QString &filePath, const QString &cpuType, QString workPath = "./Temp", QString workingFrequency = "16000000");
+
+    //递归编译指定目录以及其子目录中所有*c,*cpp
+    void compileLibrary(const QString libraryDirPath);
+
+    void getLibraryPath(const QString &filePath, QList<QString> &libDirPath, QList<QString> &libFilePath);
+
+    //给QProcess调用
+    QString getCompilerCommand(const QString &filePath, const QString &cpuType, const QList<QString> &libPaths, QString workPath = "./Temp", QString workingFrequency = "16000000");
 
 signals:
 
@@ -45,9 +55,10 @@ protected:
     explicit UploadBase(QObject *parent = 0);
     explicit UploadBase(const QString &serial, const QString &board, QObject *parent = 0);
     virtual ~UploadBase();
-    //need c++11 support, and you can use QDISABLE_COPY(CLASS)
-//    UploadBase & UploadBase(const UploadBase &) = delete;
-//    UploadBase & operator = (const UploadBase &) = delete;
+
+
+
+
     Q_DISABLE_COPY(UploadBase)
 
     //interface
@@ -66,6 +77,8 @@ protected:
     QString cmd_;
 
     QMap<QString, LibraryReferenceInfor> map_libName_infor_;
+    QString compiler_c;
+    QString compiler_cplusplus;
 };
 
 #endif // UPLOADBASE_H
