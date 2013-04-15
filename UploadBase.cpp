@@ -172,7 +172,8 @@ LibraryReferenceInfor UploadBase::getReferenceLibrarysInformation(const QString 
             if(map_libName_infor_.contains(list.at(i)))
             {
                 libRefInforInfor.libReference += map_libName_infor_.value(list.at(i)).libReference;
-                libPaths += map_libName_infor_.value(list.at(i)).libPath;
+                QFileInfo infor(map_libName_infor_.value(list.at(i)).libPath);
+                libPaths += infor.path();
             }
         }
     }
