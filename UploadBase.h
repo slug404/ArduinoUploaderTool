@@ -56,8 +56,7 @@ protected:
     explicit UploadBase(const QString &serial, const QString &board, QObject *parent = 0);
     virtual ~UploadBase();
 
-
-
+    QSet<QString> getAllChildDirPath(const QString &parentDirPath);
 
     Q_DISABLE_COPY(UploadBase)
 
@@ -76,7 +75,7 @@ protected:
     QString codePath_;
     QString cmd_;
 
-    QMap<QString, LibraryReferenceInfor> map_libName_infor_;
+    QMultiMap<QString, LibraryReferenceInfor> map_libName_infor_;
     QString compiler_c;
     QString compiler_cplusplus;
 };

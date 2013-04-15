@@ -43,6 +43,32 @@ UploadBase::~UploadBase()
 {
 }
 
+/**
+ * @brief 遍历获取某个父目录下的所有子目录的路径
+ * @param [in] parentDirPath 父目录路径
+ * @return 所有子目录的路径
+ */
+QSet<QString> UploadBase::getAllChildDirPath(const QString &parentDirPath)
+{
+    QDir dir(parentDirPath);
+    dir.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
+
+    QSet<QString> tmpDirs;
+    tmpDirs += parentDirPath;
+    foreach (const QString &dirName, dir.entryList())
+    {
+        QString childDirPath = parentDirPath + "/" + dirName;
+        if(childDirPath.contains("examples")
+                || childDirPath.contains("Examples"))
+        {
+            continue;
+        }
+        tmpDirs += getAllChildDirPath(childDirPath);
+    }
+
+    return tmpDirs;
+}
+
 QString UploadBase::getCompilerCommand(const QString &filePath, const QString &cpuType, const QList<QString> &libPaths, QString workPath, QString workingFrequency)
 {
     QFileInfo infor(filePath);
@@ -72,7 +98,14 @@ QString UploadBase::getCompilerCommand(const QString &filePath, const QString &c
     }
     //这里结构测试的时候再仔细考虑一下
     cmd += QString(filePath + " -o "  +workPath + "/" + infor.fileName() + ".o");
-
+    QFile file("cmd.txt");
+    if(!file.open(QFile::Append))
+    {
+        qDebug() << "cmd.txt can't open!!";
+    }
+    file.write(cmd.toAscii());
+    file.write("\n");
+    file.close();
     return cmd;
 }
 
@@ -84,15 +117,19 @@ QString UploadBase::getCompilerCommand(const QString &filePath, const QString &c
  */
 void UploadBase::getLibraryPath(const QString &filePath, QList<QString> &libDirPath, QList<QString> &libFilePath)
 {
-    QSet<QString> tmp;
-    getReferenceLibrarysInformation(filePath, tmp);
+    QSet<QString> libFilePathSet;
+    QSet<QString> libDirPathSet;
+    getReferenceLibrarysInformation(filePath, libFilePathSet);
 
-    libFilePath = tmp.toList();
+    libFilePath = libFilePathSet.toList();
 
     for(int i = 0; i != libFilePath.size(); ++i)
     {
-        libDirPath += QFileInfo(libFilePath.at(i)).path();
+        libDirPathSet += QFileInfo(libFilePath.at(i)).path();
+        libDirPathSet += getAllChildDirPath(QFileInfo(libFilePath.at(i)).path());
     }
+
+    libDirPath = libDirPathSet.toList();
 }
 
 void UploadBase::compileTest(const QString &filePath, const QString &cpuType, QString workPath, QString workingFrequency)
@@ -291,7 +328,16 @@ LibraryReferenceInfor UploadBase::getReferenceLibrarysInformation(const QString 
             if(map_libName_infor_.contains(list.at(i)))
             {
                 libRefInforInfor.libReference += map_libName_infor_.value(list.at(i)).libReference;
-                libPaths += map_libName_infor_.value(list.at(i)).libPath;
+                //libPaths += map_libName_infor_.value(list.at(i)).libPath;
+                if(map_libName_infor_.contains(list.at(i)))
+                {
+                    libPaths += map_libName_infor_.value(list.at(i)).libPath;
+                }
+                else
+                {
+                    //加上子目录递归
+                    //libPaths += getAllChildDirPath()
+                }
             }
         }
     }
@@ -362,7 +408,8 @@ void UploadBase::initLibrarysInfor(const QString libraryPath)
         libReferInfor.libPath = dirPath;
         libReferInfor.libReference = library;
 
-        map_libName_infor_[dirName + ".h"] = libReferInfor;
+        //map_libName_infor_[dirName + ".h"] = libReferInfor;
+        map_libName_infor_.insert(QString(dirName + ".h"), libReferInfor);
     }
 }
 
