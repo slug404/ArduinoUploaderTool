@@ -22,23 +22,23 @@ int main(int argc, char *argv[])
     QList<QString> tmpLibDirPath;
     QList<QString> tmpLibFilePath;
     QList<QString> tmpLibChildDirPath;
-    test.getLibraryPath("Blink.cpp", tmpLibDirPath, tmpLibFilePath, tmpLibChildDirPath);
+    test.getLibraryPath("imu.cpp", tmpLibDirPath, tmpLibFilePath, tmpLibChildDirPath);
     if(QFile::exists("cmd.txt"))
     {
         QFile::remove("cmd.txt");
     }
-    QString cmd = test.getCompilerCommand("Blink.cpp", "atmega328p", tmpLibDirPath, tmpLibChildDirPath);
+    QString cmd = test.getCompilerCommand("imu.cpp", "atmega328p", tmpLibDirPath, tmpLibChildDirPath);
 
     {
 
-        cmd =  test.create_elf_fileCommand("Blink.cpp", "atmega328p", "C:/Temp/core.a");
+        cmd =  test.create_elf_fileCommand("imu.cpp", "atmega328p", "C:/Temp/core.a");
 
-        cmd = test.create_eep_fileCommand("C:/arduino/hardware/tools/avr/bin/avr-objcopy", QString("./Temp/" )+ "Blink.elf", QString("./Temp/") + "Blink.eep");
+        cmd = test.create_eep_fileCommand("C:/arduino/hardware/tools/avr/bin/avr-objcopy", QString("./Temp/" )+ "imu.elf", QString("./Temp/") + "imu.eep");
 
-        cmd = test.create_hex_fileCommand("C:/arduino/hardware/tools/avr/bin/avr-objcopy", QString("./Temp/" ) + "Blink.elf", QString("./Temp/") + "Blink.hex");
+        cmd = test.create_hex_fileCommand("C:/arduino/hardware/tools/avr/bin/avr-objcopy", QString("./Temp/" ) + "imu.elf", QString("./Temp/") + "imu.hex");
 
         cmd = test.getUploadCommand("C:/arduino/hardware/tools/avr/bin/avrdude", "C:/arduino/hardware/tools/avr/etc/avrdude.conf"
-                                          , "atmega328p", "COM6", "115200", "./Temp/Blink.hex");
+                                          , "atmega328p", "COM6", "115200", "./Temp/imu.hex");
     }
 
     foreach (const QString &dirPath, tmpLibDirPath)

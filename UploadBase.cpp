@@ -403,11 +403,46 @@ LibraryReferenceInfor UploadBase::getReferenceLibrarysInformation(const QString 
         {
             if(map_libName_infor_.contains(list.at(i)))
             {
-                libRefInforInfor.libReference += map_libName_infor_.value(list.at(i)).libReference;
+                libRefInforInfor = map_libName_infor_.value(list.at(i));
 
                 if(map_libName_infor_.contains(list.at(i)))
                 {
-                    libPaths += map_libName_infor_.value(list.at(i)).libPath;
+                    libPaths += libRefInforInfor.libPath;
+                }
+            }
+            else if(QFileInfo(filePath).baseName() == QFileInfo(list.at(i)).baseName())
+            {//处理cpp对应的.h 你妹的
+                QString headerPath = QFileInfo(filePath).path() + "/" + QFileInfo(filePath).baseName() + ".h";
+                QFile file(headerPath);
+                if(!file.open(QFile::ReadOnly))
+                {
+                    qDebug() << "can't open file in path: " << headerPath;
+                    file.close();
+                    continue;
+                }
+
+                QString code = file.readAll();
+                QSet<QString> libReference = getAllMatchResults(code, "\\w+\\.h");
+                if(libReference.isEmpty())
+                {
+                    qDebug() << "reference library is empty";
+                }
+                else
+                {
+                    QList<QString> list = libReference.toList();
+
+                    for(int i = 0; i != list.size(); ++i)
+                    {
+                        if(map_libName_infor_.contains(list.at(i)))
+                        {
+                            libRefInforInfor = map_libName_infor_.value(list.at(i));
+
+                            if(map_libName_infor_.contains(list.at(i)))
+                            {
+                                libPaths += libRefInforInfor.libPath;
+                            }
+                        }
+                    }
                 }
             }
         }

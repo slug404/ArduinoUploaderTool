@@ -85,7 +85,7 @@ protected:
     QString codePath_;
     QString cmd_;
 
-    QMultiMap<QString, LibraryReferenceInfor> map_libName_infor_;
+    QMap<QString, LibraryReferenceInfor> map_libName_infor_;
     QString compiler_c;
     QString compiler_cplusplus;
 };
