@@ -26,10 +26,8 @@ class UploadBase : public QObject
 {
     Q_OBJECT
 public:
-    //递归扫描所有库的依赖关系
-    void initLibrarysInfor(const QString &libraryPath);
-    void scanReferenceInformation(const QString &parentDirPath);
-
+    //扫描库相关
+    void initLibrarysInfor(const QString libraryPath);
     //在这里得到所有的依赖
     LibraryReferenceInfor getReferenceLibrarysInformation(const QString filePath, QSet<QString> &libPaths);
     QSet<QString> getAllMatchResults(const QString text, const QString regexp);
@@ -43,10 +41,10 @@ public:
     //递归编译指定目录以及其子目录中所有*c,*cpp
     void compileLibrary(const QString libraryDirPath);
 
-    void getLibraryPath(const QString &filePath, QList<QString> &libDirPath, QList<QString> &libFilePath);
+    void getLibraryPath(const QString &filePath, QList<QString> &libDirPath, QList<QString> &libFilePath, QList<QString> &childDirPath);
 
     //给QProcess调用
-    QString getCompilerCommand(const QString &filePath, const QString &cpuType, const QList<QString> &libPaths, QString workPath = "./Temp", QString workingFrequency = "16000000");
+    QString getCompilerCommand(const QString &filePath, const QString &cpuType, const QList<QString> &libPaths, const QList<QString> &childDirPath, QString workPath = "./Temp", QString workingFrequency = "16000000");
 
 signals:
 

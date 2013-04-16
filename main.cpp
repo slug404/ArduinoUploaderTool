@@ -1,5 +1,7 @@
 #include <QCoreApplication>
 #include <QDebug>
+#include <QDir>
+#include <QFile>
 #include "UploadBase.h"
 #include "Uploader_Windows.h"
 
@@ -19,8 +21,13 @@ int main(int argc, char *argv[])
 
     QList<QString> tmpLibDirPath;
     QList<QString> tmpLibFilePath;
-    test.getLibraryPath("CardInfo.cpp", tmpLibDirPath, tmpLibFilePath);
-     QString cmd = test.getCompilerCommand("CardInfo.cpp", "atmega328p", tmpLibDirPath);
+    QList<QString> tmpLibChildDirPath;
+    test.getLibraryPath("CardInfo.cpp", tmpLibDirPath, tmpLibFilePath, tmpLibChildDirPath);
+    if(QFile::exists("cmd.txt"))
+    {
+        QFile::remove("cmd.txt");
+    }
+     QString cmd = test.getCompilerCommand("CardInfo.cpp", "atmega328p", tmpLibDirPath, tmpLibChildDirPath);
 
 
     foreach (const QString &dirPath, tmpLibDirPath)
