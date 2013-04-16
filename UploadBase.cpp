@@ -376,40 +376,62 @@ QSet<QString> UploadBase::getAllMatchResults(const QString text, const QString r
  * @brief 初始化给定的路径中的库的引用信息
  * @param libraryPath [in] 路径, 需要指定到Arduino的libraries所在路径
  */
-void UploadBase::initLibrarysInfor(const QString libraryPath)
+void UploadBase::initLibrarysInfor(const QString &libraryPath)
 {
-    QDir dir(libraryPath);
-    dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot); // filter . and ..
+    scanReferenceInformation(libraryPath);
+}
 
-    foreach (const QString dirName, dir.entryList())
+/**
+ * @brief 递归扫描指定路径下所有.cpp与.h的文件依赖关系
+ * @param [in] parentDirPath 父目录路径
+ */
+void UploadBase::scanReferenceInformation(const QString &parentDirPath)
+{
+    //处理文件
+    QDir dir(parentDirPath);
     {
-        QString dirPath = libraryPath + "/" + dirName + "/" + dirName + ".h";
-        QFile file(dirPath);
-
-        if(!file.open(QFile::ReadOnly))
+        QStringList filters;
+        filters << "*.cpp" << "*.Cpp" << "*.CPP" << "*.C" << "*.c" << "*.cxx" << "*.cc" << "*.h";
+        dir.setNameFilters(filters);
+        foreach (const QString &fileName, dir.entryList())
         {
-            qDebug() << "can't open file in path: " << dirPath;
-            file.close();
-            continue;
+            QString filePath = parentDirPath + "/" + fileName;
+            QFile file(filePath);
+            if(!file.open(QFile::ReadOnly))
+            {
+                qDebug() << "can't open file in path: " << filePath;
+                file.close();
+                continue;
+            }
+
+            QString text = file.readAll();
+            QSet<QString> librarys = getAllMatchResults(text, "\\w+\\.h");
+
+            if(librarys.isEmpty())
+            {
+                qDebug() << tr("file: %1").arg(fileName) <<"not have include other library";
+                file.close();
+                continue;
+            }
+
+            LibraryReferenceInfor libReferInfor;
+            libReferInfor.libName = fileName;
+            libReferInfor.libPath = parentDirPath;
+            libReferInfor.libReference = librarys;
+
+            //map_libName_infor_[dirName + ".h"] = libReferInfor;
+            map_libName_infor_.insert(QString(fileName), libReferInfor);
         }
+    }
 
-        QString code = file.readAll();
-        QSet<QString> library = getAllMatchResults(code, "\\w+\\.h");
-
-        if(library.isEmpty())
-        {
-            qDebug() << tr("file: %1").arg(dirName) <<"not have include other library";
-            file.close();
-            continue;
-        }
-
-        LibraryReferenceInfor libReferInfor;
-        libReferInfor.libName = dirName;
-        libReferInfor.libPath = dirPath;
-        libReferInfor.libReference = library;
-
-        //map_libName_infor_[dirName + ".h"] = libReferInfor;
-        map_libName_infor_.insert(QString(dirName + ".h"), libReferInfor);
+    //处理子目录
+    dir.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
+    QStringList childDirNames = dir.entryList();
+    foreach (const QString &childDirName, childDirNames)
+    {
+        QString childDirPath = parentDirPath + "/" + childDirName;
+        scanReferenceInformation(childDirPath);
     }
 }
+
 

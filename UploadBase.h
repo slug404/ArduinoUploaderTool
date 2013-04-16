@@ -26,8 +26,10 @@ class UploadBase : public QObject
 {
     Q_OBJECT
 public:
-    //扫描库相关
-    void initLibrarysInfor(const QString libraryPath);
+    //递归扫描所有库的依赖关系
+    void initLibrarysInfor(const QString &libraryPath);
+    void scanReferenceInformation(const QString &parentDirPath);
+
     //在这里得到所有的依赖
     LibraryReferenceInfor getReferenceLibrarysInformation(const QString filePath, QSet<QString> &libPaths);
     QSet<QString> getAllMatchResults(const QString text, const QString regexp);
