@@ -27,7 +27,7 @@ class UploadBase : public QObject
     Q_OBJECT
 public:
     //扫描库相关
-    void initLibrarysInfor(const QString libraryPath);
+    void initLibraryReferenceInformation(const QString libraryPath);
     //在这里得到所有的依赖
     LibraryReferenceInfor getReferenceLibrarysInformation(const QString filePath, QSet<QString> &libPaths);
     QSet<QString> getAllMatchResults(const QString text, const QString regexp);
@@ -44,7 +44,17 @@ public:
     void getLibraryPath(const QString &filePath, QList<QString> &libDirPath, QList<QString> &libFilePath, QList<QString> &childDirPath);
 
     //给QProcess调用
+    //编译
     QString getCompilerCommand(const QString &filePath, const QString &cpuType, const QList<QString> &libPaths, const QList<QString> &childDirPath, QString workPath = "./Temp", QString workingFrequency = "16000000");
+    //链接
+    void linkerCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath = "./Temp", QString workingFrequency = "16000000");
+    QString create_elf_fileCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath = "./Temp", QString workingFrequency = "16000000");
+    QString create_eep_fileCommand(const QString &toolPath, const QString &elfPath, const QString &eepPath);
+    QString create_hex_fileCommand(const QString &toolPath, const QString &elfPath, const QString &hexPath);
+
+    QString getUploadCommand(const QString &avrdudePath, const QString &configPath, const QString &cpuType, const QString &serialPort, const QString &baudrate, const QString &hexPath);
+    //上传
+
 
 signals:
 

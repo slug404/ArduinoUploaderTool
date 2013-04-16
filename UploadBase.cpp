@@ -129,6 +129,61 @@ QString UploadBase::getCompilerCommand(const QString &filePath, const QString &c
 }
 
 /**
+ * @brief UploadBase::linkerCommand
+ * @param filePath
+ * @param cpuType
+ * @param staticLibraryPath
+ * @param workPath
+ * @param workingFrequency
+ */
+void UploadBase::linkerCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath, QString workingFrequency)
+{
+
+}
+
+QString UploadBase::create_elf_fileCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath,  QString workPath, QString workingFrequency)
+{
+    QString t = QFileInfo(filePath).baseName();
+    QString cmd = QString("%1 -Os -Wl,--gc-sections -mmcu=%2 -o %3 ").arg("C:/arduino/hardware/tools/avr/bin/avr-gcc").arg(cpuType).arg(workPath + "/" + t + ".elf");
+
+    QDir dir(workPath);
+    dir.setFilter(QDir::Files);
+    QStringList tmp = dir.entryList();
+    foreach (const QString &fileName, tmp)
+    {
+        if(fileName.contains(".cpp.o"))
+        {
+            cmd += workPath+"/" + fileName + " ";
+        }
+    }
+    cmd += staticLibraryPath + " -LC:" + workPath + " -lm";
+
+    return cmd;
+}
+
+QString UploadBase::create_eep_fileCommand(const QString &toolPath, const QString &elfPath, const QString &eepPath)
+{
+    QString cmd = QString("%1 -O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0 %2 %3").arg(toolPath).arg(elfPath).arg(eepPath);
+
+    return cmd;
+}
+
+QString UploadBase::create_hex_fileCommand(const QString &toolPath, const QString &elfPath, const QString &hexPath)
+{
+    QString cmd = QString("%1 -O ihex -R .eeprom %2 %3").arg(toolPath).arg(elfPath).arg(hexPath);
+
+    return cmd;
+}
+
+QString UploadBase::getUploadCommand(const QString &avrdudePath, const QString &configPath,
+                                           const QString &cpuType, const QString &serialPort, const QString &baudrate, const QString &hexPath)
+{
+    QString cmd = QString("%1 -C%2 -v -v -v -v -p%3 -carduino -P%4 -b%5 -D -Uflash:w:%6:i").arg(avrdudePath).arg(configPath).arg(cpuType).arg(serialPort).arg(baudrate).arg(hexPath);
+
+    return cmd;
+}
+
+/**
  * @brief 扔一个文件路径, 设置好它引用的库的目录路径以及库的文件路径
  * @param [in] filePath 文件路径
  * @param [out] libDirPath 引用库的目录路径
@@ -392,7 +447,7 @@ QSet<QString> UploadBase::getAllMatchResults(const QString text, const QString r
  * @brief 初始化给定的路径中的库的引用信息
  * @param libraryPath [in] 路径, 需要指定到Arduino的libraries所在路径
  */
-void UploadBase::initLibrarysInfor(const QString libraryPath)
+void UploadBase::initLibraryReferenceInformation(const QString libraryPath)
 {
     QDir dir(libraryPath);
     dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot); // filter . and ..
@@ -424,7 +479,6 @@ void UploadBase::initLibrarysInfor(const QString libraryPath)
         libReferInfor.libPath = dirPath;
         libReferInfor.libReference = library;
 
-        //map_libName_infor_[dirName + ".h"] = libReferInfor;
         map_libName_infor_.insert(QString(dirName + ".h"), libReferInfor);
     }
 }
