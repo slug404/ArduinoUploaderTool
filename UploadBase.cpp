@@ -151,7 +151,8 @@ QString UploadBase::create_elf_fileCommand(const QString &filePath, const QStrin
     QStringList tmp = dir.entryList();
     foreach (const QString &fileName, tmp)
     {
-        if(fileName.contains(".cpp.o"))
+        if(fileName.contains(".cpp.o")
+                || fileName.contains(".c.o"))
         {
             cmd += workPath+"/" + fileName + " ";
         }
@@ -453,6 +454,28 @@ LibraryReferenceInfor UploadBase::getReferenceLibrarysInformation(const QString 
     libRefInforInfor.libPath = filePath;
 
     return libRefInforInfor;
+}
+
+/**
+ * @brief 给定一个文件路径获取其头文件列表
+ * @param filePath 文件路径
+ * @return 匹配的头文件列表
+ */
+QSet<QString> UploadBase::getHeaderFiles(const QString &filePath)
+{
+    QFile file(filePath);
+    if(!file.open(QFile::ReadOnly))
+    {
+        qDebug() << "getHeaderFiles file can't open " << filePath;
+        qDebug() << file.errorString();
+        file.close();
+        return QSet<QString>();
+    }
+
+    QString text = file.readAll();
+    QSet<QString> headerFiles = getAllMatchResults(text);
+
+    return headerFiles;
 }
 
 /**

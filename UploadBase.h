@@ -30,7 +30,8 @@ public:
     void initLibraryReferenceInformation(const QString libraryPath);
     //在这里得到所有的依赖
     LibraryReferenceInfor getReferenceLibrarysInformation(const QString filePath, QSet<QString> &libPaths);
-    QSet<QString> getAllMatchResults(const QString text, const QString regexp);
+    QSet<QString> getHeaderFiles(const QString &filePath);
+    QSet<QString> getAllMatchResults(const QString text, const QString regexp = "\\w+\\.h");
 
     //复制库相关
     void copyDirectory(const QString &srcPath, const QString &desPath);
@@ -85,7 +86,7 @@ protected:
     QString codePath_;
     QString cmd_;
 
-    QMap<QString, LibraryReferenceInfor> map_libName_infor_;
+    QMultiMap<QString, LibraryReferenceInfor> map_libName_infor_;
     QString compiler_c;
     QString compiler_cplusplus;
 };
