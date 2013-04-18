@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QFile>
+#include <QMap>
 #include "UploadBase.h"
 #include "Uploader_Windows.h"
 
@@ -11,23 +12,27 @@ const int PARAMER_COUNT = 1+3;
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    Uploader_Windows test;
-    test.initLibraryReferenceInformation("c:/arduino/libraries");
-
-    //QSet<QString> libPaths;
-    //LibraryReferenceInfor bb = test.getReferenceLibrarysInformation("./test.cpp", libPaths);
-    //test.compileTest("./test.cpp", "atmega328p");
-    //编译自己
-
-    QList<QString> tmpLibDirPath;
-    QList<QString> tmpLibFilePath;
-    QList<QString> tmpLibChildDirPath;
-    test.getLibraryPath("imu.cpp", tmpLibDirPath, tmpLibFilePath, tmpLibChildDirPath);
     if(QFile::exists("cmd.txt"))
     {
         QFile::remove("cmd.txt");
     }
-    QString cmd = test.getCompilerCommand("imu.cpp", "atmega328p", tmpLibDirPath, tmpLibChildDirPath);
+
+    Uploader_Windows test;
+    test.initLibraryReferenceInformation("c:/arduino/libraries");
+    test.scanAllheaderFile("c:/arduino/libraries");
+    //QSet<QString> headerFiles = test.getReferenceLibrarysInformation("imu.cpp");
+    QSet<QString> headerFiles = test.getHeaderFiles("imu.cpp");
+    QSet<QString> tmpLibDirPath;
+    foreach (const QString header, headerFiles)
+    {
+        if(test.map_libName_infor_.contains(header))
+        {
+            tmpLibDirPath << test.map_libName_infor_.value(header).libPath;
+        }
+    }
+
+    QString cmd = test.getCompilerCommand("imu.cpp", "atmega328p", tmpLibDirPath.toList());
+    //QString cmd = test.com("imu.cpp", "atmega328p", headerFiles.toList());
 
     {
 

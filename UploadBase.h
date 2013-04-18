@@ -26,10 +26,12 @@ class UploadBase : public QObject
 {
     Q_OBJECT
 public:
+    void scanAllheaderFile(const QString &path);
+
     //扫描库相关
     void initLibraryReferenceInformation(const QString libraryPath);
     //在这里得到所有的依赖
-    LibraryReferenceInfor getReferenceLibrarysInformation(const QString filePath, QSet<QString> &libPaths);
+    QSet<QString> getReferenceLibrarysInformation(const QString &filePath);
     QSet<QString> getHeaderFiles(const QString &filePath);
     QSet<QString> getAllMatchResults(const QString text, const QString regexp = "\\w+\\.h");
 
@@ -47,16 +49,16 @@ public:
     //给QProcess调用
     //编译
     QString getCompilerCommand(const QString &filePath, const QString &cpuType, const QList<QString> &libPaths, const QList<QString> &childDirPath, QString workPath = "./Temp", QString workingFrequency = "16000000");
+    QString getCompilerCommand(const QString &filePath, const QString &cpuType, const QList<QString> &libPaths, QString workPath = "./Temp", QString workingFrequency = "16000000");
     //链接
     void linkerCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath = "./Temp", QString workingFrequency = "16000000");
     QString create_elf_fileCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath = "./Temp", QString workingFrequency = "16000000");
     QString create_eep_fileCommand(const QString &toolPath, const QString &elfPath, const QString &eepPath);
     QString create_hex_fileCommand(const QString &toolPath, const QString &elfPath, const QString &hexPath);
 
-    QString getUploadCommand(const QString &avrdudePath, const QString &configPath, const QString &cpuType, const QString &serialPort, const QString &baudrate, const QString &hexPath);
     //上传
-
-
+    QString getUploadCommand(const QString &avrdudePath, const QString &configPath, const QString &cpuType, const QString &serialPort, const QString &baudrate, const QString &hexPath);
+    QMap<QString, LibraryReferenceInfor> map_libName_infor_;
 signals:
 
 public slots:
@@ -86,9 +88,10 @@ protected:
     QString codePath_;
     QString cmd_;
 
-    QMultiMap<QString, LibraryReferenceInfor> map_libName_infor_;
+    QMultiMap<QString, QString> map_headerFile_path_;
     QString compiler_c;
     QString compiler_cplusplus;
+    QSet<QString> alreadyCompile_;
 };
 
 #endif // UPLOADBASE_H
