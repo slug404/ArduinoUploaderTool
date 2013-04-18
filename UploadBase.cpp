@@ -230,56 +230,6 @@ QString UploadBase::getUploadCommand(const QString &avrdudePath, const QString &
 }
 
 /**
- * @brief 扔一个文件路径, 设置好它引用的库的目录路径以及库的文件路径
- * @param [in] filePath 文件路径
- * @param [out] libDirPath 引用库的目录路径
- * @param [out] libFilePath 引用库的文件路径
- */
-void UploadBase::getLibraryPath(const QString &filePath, QList<QString> &libDirPath, QList<QString> &libFilePath, QList<QString> &childDirPath)
-{
-    //    QSet<QString> libFilePathSet;
-    //    QSet<QString> libDirPathSet;
-
-    //    libFilePath = libFilePathSet.toList();
-
-    //    for(int i = 0; i != libFilePath.size(); ++i)
-    //    {
-    //        libDirPathSet += QFileInfo(libFilePath.at(i)).path();
-    //        childDirPath += getAllChildDirPath(QFileInfo(libFilePath.at(i)).path()).toList();
-    //    }
-
-    //    libDirPath = libDirPathSet.toList();
-
-
-}
-
-void UploadBase::compileTest(const QString &filePath, const QString &cpuType, QString workPath, QString workingFrequency)
-{
-    QList<QString> tmplibDirPath;
-    QList<QString> tmplibFilePath;
-    QList<QString> tmplibChildDirPath;
-    //getLibraryPath(filePath, tmplibDirPath, tmplibFilePath, tmplibChildDirPath);
-
-    //编译本文件
-    QString cmd = getCompilerCommand(filePath, cpuType, tmplibDirPath, tmplibChildDirPath, workPath, workingFrequency);
-    qDebug() << cmd;
-
-    //递归编译其他引用
-    if(!tmplibFilePath.isEmpty())
-    {
-        for(int i = 0; i != tmplibFilePath.size(); ++i)
-        {
-            QString filePath = tmplibFilePath.at(i);
-            compileTest(filePath, cpuType);
-        }
-    }
-    else
-    {
-        return;
-    }
-}
-
-/**
  * @brief 递归编译指定库目录中的所有*c,*cpp
  * @param libraryDirPath 库目录路径
  */

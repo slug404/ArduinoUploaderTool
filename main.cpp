@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     Uploader_Windows test;
     test.initLibraryReferenceInformation("c:/arduino/libraries");
     test.scanAllheaderFile("c:/arduino/libraries");
-    //QSet<QString> headerFiles = test.getReferenceLibrarysInformation("imu.cpp");
+
     QSet<QString> headerFiles = test.getHeaderFiles("imu.cpp");
     QSet<QString> tmpLibDirPath;
     foreach (const QString header, headerFiles)
@@ -32,10 +32,9 @@ int main(int argc, char *argv[])
     }
 
     QString cmd = test.getCompilerCommand("imu.cpp", "atmega328p", tmpLibDirPath.toList());
-    //QString cmd = test.com("imu.cpp", "atmega328p", headerFiles.toList());
 
     {
-
+        //这里要清理
         cmd =  test.create_elf_fileCommand("imu.cpp", "atmega328p", "C:/Temp/core.a");
 
         cmd = test.create_eep_fileCommand("C:/arduino/hardware/tools/avr/bin/avr-objcopy", QString("./Temp/" )+ "imu.elf", QString("./Temp/") + "imu.eep");

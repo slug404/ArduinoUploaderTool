@@ -7,8 +7,6 @@
 #include <QSet>
 #include <QMap>
 
-
-
 /**
  * @brief 库引用信息
  */
@@ -39,12 +37,8 @@ public:
     void copyDirectory(const QString &srcPath, const QString &desPath);
     bool copyFile(const QString &srcPath, const QString &desPath);
 
-    void compileTest(const QString &filePath, const QString &cpuType, QString workPath = "./Temp", QString workingFrequency = "16000000");
-
     //递归编译指定目录以及其子目录中所有*c,*cpp
     void compileLibrary(const QString libraryDirPath);
-
-    void getLibraryPath(const QString &filePath, QList<QString> &libDirPath, QList<QString> &libFilePath, QList<QString> &childDirPath);
 
     //给QProcess调用
     //编译
