@@ -11,17 +11,22 @@ const int PARAMER_COUNT = 1+3;
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+	QCoreApplication a(argc, argv);
     if(QFile::exists("cmd.txt"))
     {
         QFile::remove("cmd.txt");
     }
 
     Uploader_Windows test;
+
+#ifdef Q_OS_WIN32
     test.initLibraryReferenceInformation("c:/arduino/libraries");
     test.scanAllheaderFile("c:/arduino/libraries");
-
-    QSet<QString> headerFiles = test.getHeaderFiles("imu.cpp");
+#else
+	test.scanAllLibraryHeaderFile("./Arduino/libraries");
+	test.scanAllheaderFile("./Arduino/libraries");
+#endif
+	QSet<QString> headerFiles = test.getReferenceHeaderFilesFromSingleFile("imu.cpp");
     QSet<QString> tmpLibDirPath;
     foreach (const QString header, headerFiles)
     {
@@ -35,7 +40,8 @@ int main(int argc, char *argv[])
 
     {
         //这里要清理
-        cmd =  test.create_elf_fileCommand("imu.cpp", "atmega328p", "C:/Temp/core.a");
+#ifdef Q_OS_WIN32
+		cmd =  test.create_elf_fileCommand("imu.cpp", "atmega328p", "C:/Temp/core.a");
 
         cmd = test.create_eep_fileCommand("C:/arduino/hardware/tools/avr/bin/avr-objcopy", QString("./Temp/" )+ "imu.elf", QString("./Temp/") + "imu.eep");
 
@@ -43,6 +49,16 @@ int main(int argc, char *argv[])
 
         cmd = test.getUploadCommand("C:/arduino/hardware/tools/avr/bin/avrdude", "C:/arduino/hardware/tools/avr/etc/avrdude.conf"
                                           , "atmega328p", "COM6", "115200", "./Temp/imu.hex");
+#else
+		cmd =  test.create_elf_fileCommand("imu.cpp", "atmega328p", "./Temp/core.a");
+
+		cmd = test.create_eep_fileCommand("./Arduino/hardware/tools/avr/bin/avr-objcopy", QString("./Temp/" )+ "imu.elf", QString("./Temp/") + "imu.eep");
+
+		cmd = test.create_hex_fileCommand("./Arduino/hardware/tools/avr/bin/avr-objcopy", QString("./Temp/" ) + "imu.elf", QString("./Temp/") + "imu.hex");
+
+		cmd = test.getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "C:/arduino/hardware/tools/avr/etc/avrdude.conf"
+										  , "atmega328p", "tty.usbmodem1d1321", "115200", "./Temp/imu.hex");
+#endif
     }
 
     foreach (const QString &dirPath, tmpLibDirPath)

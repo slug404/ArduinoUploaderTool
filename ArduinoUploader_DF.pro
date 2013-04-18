@@ -11,9 +11,6 @@ greaterThan(QT_MAJOR_VERSION, 4): QMAKE_CXXFLAGS += -std=c++0x
 equals(QT_MAJOR_VERSION, 5): CONFIG += c++11
 
 TARGET = ArduinoUploader_DF
-CONFIG   += console
-CONFIG   -= app_bundle
-
 TEMPLATE = app
 
 INCLUDEPATH += ./QExtserialport
