@@ -6,20 +6,6 @@
 #include <QRegExp>
 #include <QProcess>
 
-UploadBase::UploadBase(QObject *parent)
-	: QObject(parent)
-	, pExternalProcess_(NULL)
-	, serialPort_("")
-	, boardType_("")
-	, compilerPath_("")
-	, codePath_("")
-	, cmd_("")
-	, compiler_c("")
-	, compiler_cplusplus("")
-{
-	initData();
-}
-
 /**
  * @brief 构造函数
  * @param [in] serial 串口号
@@ -28,30 +14,24 @@ UploadBase::UploadBase(QObject *parent)
  * @param [in] debug debug模式?
  * @param [in] parent
  */
-UploadBase::UploadBase(const QString &serial, const QString &board, QObject *parent)
+UploadBase::UploadBase(const QString &codePath, const QString &serial, const QString &board, QObject *parent)
 	: QObject(parent)
 	, pExternalProcess_(NULL)
 	, serialPort_(serial)
 	, boardType_(board)
 	, compilerPath_("")
-	, codePath_("")
+	, codePath_(codePath)
 	, cmd_("")
 	, compiler_c("")
 	, compiler_cplusplus("")
 {
-	initData();
+	pExternalProcess_ = new QProcess(this);
+	connect(pExternalProcess_, SIGNAL(readyReadStandardError()), this, SLOT(slotreadyReadStandardError()));
+	connect(pExternalProcess_, SIGNAL(readyReadStandardOutput()), this, SLOT(slotReadyReadStandardOutput()));
 }
 
 UploadBase::~UploadBase()
 {
-}
-
-//init data
-void UploadBase::initData()
-{
-	pExternalProcess_ = new QProcess(this);
-	connect(pExternalProcess_, SIGNAL(readyReadStandardError()), this, SLOT(slotreadyReadStandardError()));
-	connect(pExternalProcess_, SIGNAL(readyReadStandardOutput()), this, SLOT(slotReadyReadStandardOutput()));
 }
 
 /**
@@ -165,7 +145,30 @@ QString UploadBase::getCompilerCommand(const QString &sketchPath, const QString 
  */
 void UploadBase::linkerCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath, QString workingFrequency)
 {
+	QString elfPath = filePath + ".elf";
+	QString eepPath = filePath + ".eep";
+	QString hexPath = filePath + ".hex";
 
+	QString elf = create_elf_fileCommand(filePath, cpuType, staticLibraryPath, workPath, workingFrequency);
+//这部分到整合目录之后就可以统一了
+#ifdef Q_OS_WIN32
+	QString eep = create_eep_fileCommand("C:/arduino/hardware/tools/avr/bin/avr-objcopy", elfPath, eepPath);
+	QString hex = create_hex_fileCommand("C:/arduino/hardware/tools/avr/bin/avr-objcopy",elfPath, eepPath);
+#elif defined(Q_OS_LINUX)
+	QString eep = create_eep_fileCommand("./Arduino/hardware/tools/avr/bin/avr-objcopy", elfPath, eepPath);
+	QString hex = create_hex_fileCommand("./Arduino/hardware/tools/avr/bin/avr-objcopy",elfPath, hexPath);
+#elif defined(Q_OS_MAC)
+	QString eep = create_eep_fileCommand("./Arduino/hardware/tools/avr/bin/avr-objcopy", elfPath, eepPath);
+	QString hex = create_hex_fileCommand("./Arduino/hardware/tools/avr/bin/avr-objcopy",elfPath, hexPath);
+#endif
+
+	//调用QProcess
+	if(pExternalProcess_)
+	{
+		pExternalProcess_->execute(elf);//生成elf文件
+		pExternalProcess_->execute(eep);//生成eep文件
+		pExternalProcess_->execute(hex);//生成hex文件
+	}
 }
 
 /**
@@ -177,7 +180,7 @@ void UploadBase::linkerCommand(const QString &filePath, const QString &cpuType, 
  * @param [in] workingFrequency 开发版的工作频率, 默认16Mhz目前不做使用
  * @return 可以扔给avr-gcc的命令
  */
-QString UploadBase::create_elf_fileCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath,  QString workPath, QString workingFrequency)
+QString UploadBase::create_elf_fileCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath, QString workingFrequency)
 {
 	QString baseName = QFileInfo(filePath).baseName();
 #ifdef Q_OS_WIN32
@@ -618,7 +621,6 @@ void UploadBase::scanAllheaderFile(const QString &path)
 		}
 	}
 }
-
 
 void UploadBase::slotReadyReadStandardOutput()
 {

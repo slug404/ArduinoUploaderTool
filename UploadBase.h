@@ -16,6 +16,18 @@ struct LibraryReferenceInfor
 	QSet<QString> libReference;/**< 该库所包含的其他库 */
 };
 
+/**
+ * @brief The Board struct 开发版的基本信息
+ */
+struct Board
+{
+	QString name;/**< 开发版的全名 */
+	QString mcu;/**< mcu的名字 */
+	QString mcuType;/**< mcu的类型,主要针对leonardo的特殊处理 */
+	QString baudrate;/**< 波特率 */
+	int flashSIze;/**< flash的大小,用于可能要处理的超出大小的判断 */
+};
+
 /*!
  * \brief Uploader的基类
  */
@@ -24,35 +36,6 @@ class UploadBase : public QObject
 	Q_OBJECT
 public:
 	virtual ~UploadBase();
-	//扫描库相关
-	void scanAllLibraryHeaderFile(const QString &libraryPath);
-	void scanAllheaderFile(const QString &path);
-	//在这里得到所有的依赖
-	QSet<QString> getAllReferenceHeaderFileSet(const QString &filePath);
-	QSet<QString> getReferenceHeaderFilesFromSingleFile(const QString &filePath);
-	//正则匹配抽取一个文本中#include的头文件, 这里正则匹配还可以改善
-	QSet<QString> getAllMatchResults(const QString text, const QString regexp = "\\w+\\.h");
-
-	//复制库相关,为了防止有同名文件导致的覆盖问题.目前暂时不使用
-	void copyDirectory(const QString &srcPath, const QString &desPath);
-	bool copyFile(const QString &srcPath, const QString &desPath);
-
-	//递归编译指定目录以及其子目录中所有*c,*cpp
-	void compileLibrary(const QString libraryDirPath);
-
-	//给QProcess调用
-	//编译
-	QString getCompilerCommand(const QString &sketchPath, const QString &cpuType, const QList<QString> &libPaths, QString workPath = "./Temp", QString workingFrequency = "16000000");
-	//链接
-	void linkerCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath = "./Temp", QString workingFrequency = "16000000");
-	QString create_elf_fileCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath = "./Temp", QString workingFrequency = "16000000");
-	QString create_eep_fileCommand(const QString &toolPath, const QString &elfPath, const QString &eepPath);
-	QString create_hex_fileCommand(const QString &toolPath, const QString &elfPath, const QString &hexPath);
-
-	//上传
-	QString getUploadCommand(const QString &avrdudePath, const QString &configPath, const QString &cpuType, const QString &serialPort, const QString &baudrate, const QString &hexPath);
-	QMap<QString, LibraryReferenceInfor> map_libName_infor_;
-
 /*!
 * \brief 错误类型
 */
@@ -99,14 +82,36 @@ public slots:
 
 protected:
 	//fucntion
-	explicit UploadBase(QObject *parent = 0);
 	explicit UploadBase(const QString &codePath, const QString &serial, const QString &board, QObject *parent = 0);
 
-	//init
-	void initData();
+	//扫描库相关
+	void scanAllLibraryHeaderFile(const QString &libraryPath);
+	void scanAllheaderFile(const QString &path);
+	//在这里得到所有的依赖
+	QSet<QString> getAllReferenceHeaderFileSet(const QString &filePath);
+	QSet<QString> getReferenceHeaderFilesFromSingleFile(const QString &filePath);
+	//正则匹配抽取一个文本中#include的头文件, 这里正则匹配还可以改善
+	QSet<QString> getAllMatchResults(const QString text, const QString regexp = "\\w+\\.h");
 
+	//递归编译指定目录以及其子目录中所有*c,*cpp
+	void compileLibrary(const QString libraryDirPath);
+
+	//给QProcess调用
+	//编译
+	QString getCompilerCommand(const QString &sketchPath, const QString &cpuType, const QList<QString> &libPaths, QString workPath = "./Temp", QString workingFrequency = "16000000");
+	//链接
+	void linkerCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath = "./Temp", QString workingFrequency = "16000000");
+	QString create_elf_fileCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath = "./Temp", QString workingFrequency = "16000000");
+	QString create_eep_fileCommand(const QString &toolPath, const QString &elfPath, const QString &eepPath);
+	QString create_hex_fileCommand(const QString &toolPath, const QString &elfPath, const QString &hexPath);
+
+	//上传
+	QString getUploadCommand(const QString &avrdudePath, const QString &configPath, const QString &cpuType, const QString &serialPort, const QString &baudrate, const QString &hexPath);
 	QSet<QString> getAllChildDirPath(const QString &parentDirPath);
 
+	//复制库相关,为了防止有同名文件导致的覆盖问题.目前暂时不使用
+	void copyDirectory(const QString &srcPath, const QString &desPath);
+	bool copyFile(const QString &srcPath, const QString &desPath);
 
 	Q_DISABLE_COPY(UploadBase)
 
@@ -126,8 +131,9 @@ protected:
 	QString compilerPath_;
 	QString codePath_;
 	QString cmd_;
-
+	QMap<QString, LibraryReferenceInfor> map_libName_infor_;
 	QMultiMap<QString, QString> map_headerFile_path_;
+	QMap<QString, Board> map_boardName_Infor_;
 	QString compiler_c;
 	QString compiler_cplusplus;
 	QSet<QString> alreadyCompile_;
