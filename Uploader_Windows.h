@@ -9,7 +9,6 @@ class Uploader_Windows : public UploadBase
 {
     Q_OBJECT
 public:
-    explicit Uploader_Windows(QObject *parent = 0);
 	explicit Uploader_Windows(const QString &codePath, const QString &serial, const QString &board, QObject *parent = 0);
 	virtual ~Uploader_Windows();
     //interface

@@ -1,13 +1,10 @@
 #include "Uploader_Linux.h"
 
-Uploader_Linux::Uploader_Linux(QObject *parent)
-	: UploadBase(parent)
-{
-}
-
 Uploader_Linux::Uploader_Linux(const QString &codePath, const QString &serial, const QString &board, QObject *parent)
 	: UploadBase(codePath, serial, board, parent)
 {
+	scanAllLibraryHeaderFile("./Arduino/libraries");
+	scanAllheaderFile("./Arduino/libraries");
 }
 
 Uploader_Linux::~Uploader_Linux()
