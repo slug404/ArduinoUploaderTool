@@ -50,8 +50,8 @@ UploadBase::~UploadBase()
 void UploadBase::initData()
 {
 	pExternalProcess_ = new QProcess(this);
-	connect(pExternalProcess_, SIGNAL(readyReadStandardError), this, SLOT(slotreadyReadStandardError()));
-	connect(pExternalProcess_, SIGNAL(readyReadStandardOutput), this, SLOT(slotReadyReadStandardOutput()));
+	connect(pExternalProcess_, SIGNAL(readyReadStandardError()), this, SLOT(slotreadyReadStandardError()));
+	connect(pExternalProcess_, SIGNAL(readyReadStandardOutput()), this, SLOT(slotReadyReadStandardOutput()));
 }
 
 /**
@@ -622,8 +622,18 @@ void UploadBase::scanAllheaderFile(const QString &path)
 
 void UploadBase::slotReadyReadStandardOutput()
 {
+	readStandardOutput();
 }
 
 void UploadBase::slotreadyReadStandardError()
+{
+	readStandardError();
+}
+
+void UploadBase::slotStateChanged(QProcess::ProcessState state)
+{
+}
+
+void UploadBase::slotProcessError(QProcess::ProcessError error)
 {
 }

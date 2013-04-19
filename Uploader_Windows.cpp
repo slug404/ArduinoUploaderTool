@@ -20,3 +20,11 @@ void Uploader_Windows::writePro()
 void Uploader_Windows::clear()
 {
 }
+
+void Uploader_Windows::readStandardOutput()
+{
+}
+
+void Uploader_Windows::readStandardError()
+{
+}

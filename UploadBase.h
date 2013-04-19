@@ -120,7 +120,7 @@ protected:
 
 protected:
 	//data
-	QProcess pExternalProcess_;//! 调用的外部程序指针
+	QProcess *pExternalProcess_;//! 调用的外部程序指针
 	QString serialPort_;//! 串口号
 	QString boardType_;//! 板子类型
 	QString compilerPath_;

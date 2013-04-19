@@ -15,6 +15,15 @@ public:
 signals:
 	
 public slots:
+
+protected:
+	//interface
+	virtual void setup(); //! 准备
+	virtual void compile(); //! 编译
+	virtual void writePro();//! 烧写
+	virtual void clear(); //! 清理
+	virtual void readStandardOutput();
+	virtual void readStandardError();
 	
 };
 
