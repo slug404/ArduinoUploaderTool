@@ -21,7 +21,18 @@ struct LibraryReferenceInfor
  */
 struct Board
 {
-	QString name;/**< 开发版的全名 */
+	Board(){}
+
+	Board(const QString &name, const QString &mcu, const QString &type, const QString baud, int size)
+		: fullName(name)
+		, mcu(mcu)
+		, mcuType(type)
+		, baudrate(baud)
+		, flashSIze(size)
+	{
+	}
+
+	QString fullName;/**< 开发版的全名 */
 	QString mcu;/**< mcu的名字 */
 	QString mcuType;/**< mcu的类型,主要针对leonardo的特殊处理 */
 	QString baudrate;/**< 波特率 */
@@ -133,7 +144,7 @@ protected:
 	QString cmd_;
 	QMap<QString, LibraryReferenceInfor> map_libName_infor_;
 	QMultiMap<QString, QString> map_headerFile_path_;
-	QMap<QString, Board> map_boardName_Infor_;
+	QMap<int, Board> map_boardIndex_Infor_;
 	QString compiler_c;
 	QString compiler_cplusplus;
 	QSet<QString> alreadyCompile_;

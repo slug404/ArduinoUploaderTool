@@ -28,6 +28,26 @@ UploadBase::UploadBase(const QString &codePath, const QString &serial, const QSt
 	pExternalProcess_ = new QProcess(this);
 	connect(pExternalProcess_, SIGNAL(readyReadStandardError()), this, SLOT(slotreadyReadStandardError()));
 	connect(pExternalProcess_, SIGNAL(readyReadStandardOutput()), this, SLOT(slotReadyReadStandardOutput()));
+
+	//init board information
+	{
+		map_boardIndex_Infor_[0] = Board("Arduino Uno", "atmega328p", "standard", "115200", 32768);
+		map_boardIndex_Infor_[1] = Board("Arduino Leonardo", "atmega32u4", "leonardo", "57600", 32768);
+		map_boardIndex_Infor_[2] = Board("Arduino Esplora", "atmega32u4", "leonardo", "57600", 32768);
+		map_boardIndex_Infor_[3] = Board("Arduino Micro", "atmega32u4", "micro", "57600", 32768);
+		map_boardIndex_Infor_[4] = Board("Arduino Duemilanove (328)", "atmega328p", "standard", "57600", 32768);
+		map_boardIndex_Infor_[5] = Board("Arduino Duemilanove (168)", "atmega168", "standard", "19200", 16384);
+		map_boardIndex_Infor_[6] = Board("Arduino Nano (328)", "atmega328p", "eightanaloginputs", "57600", 32768);
+		map_boardIndex_Infor_[7] = Board("Arduino Nano (168)", "atmega168", "eightanaloginputs", "19200", 16384);
+		map_boardIndex_Infor_[8] = Board("Arduino Mini (328)", "atmega328p", "eightanaloginputs", "57600", 32768);
+		map_boardIndex_Infor_[9] = Board("Arduino Mini (168)", "atmega168", "eightanaloginputs", "19200", 16384);
+		map_boardIndex_Infor_[10] = Board("Arduino Pro Mini (328)", "atmega328p", "standard", "57600", 32768);
+		map_boardIndex_Infor_[11] = Board("Arduino Pro Mini (168)", "atmega168p", "standard", "19200", 16384);
+		map_boardIndex_Infor_[12] = Board("Arduino Mega 2560/ADK", "atmega2560", "mega", "115200", 262144);
+		map_boardIndex_Infor_[13] = Board("Arduino Mega 1280", "atmega1280", "mega", "57600", 131072);
+		map_boardIndex_Infor_[14] = Board("Arduino Mega 8", "atmega8", "standard", "19200", 8192);
+		map_boardIndex_Infor_[15] = Board("Microduino Core+ (644P)", "atmega644p", "plus", "115200", 65536);
+	}
 }
 
 UploadBase::~UploadBase()
@@ -89,16 +109,16 @@ QString UploadBase::getCompilerCommand(const QString &sketchPath, const QString 
 #ifdef Q_OS_WIN32
 		cmd = QString("%1/avr-gcc -c -g -Os -Wall -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3L -MMD -DUSB_VID=null -DARDUINO=103 ").arg("C:/arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency);
 #else
-			cmd = QString("%1/avr-gcc -c -g -Os -Wall -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3L -MMD -DUSB_VID=null -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency);
+		cmd = QString("%1/avr-gcc -c -g -Os -Wall -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3L -MMD -DUSB_VID=null -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency);
 #endif
 	}
 	else if("cpp" == suffix
 			|| "CPP" == suffix)
 	{
 #ifdef Q_OS_WIN32
-	cmd = QString("%1/avr-g++ -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3L -MMD -DUSB_VID=null -DUSB_PID=null -DARDUINO=103 ").arg("C:/arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency);
+		cmd = QString("%1/avr-g++ -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3L -MMD -DUSB_VID=null -DUSB_PID=null -DARDUINO=103 ").arg("C:/arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency);
 #else
-	cmd = QString("%1/avr-g++ -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3L -MMD -DUSB_VID=null -DUSB_PID=null -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency);
+		cmd = QString("%1/avr-g++ -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3L -MMD -DUSB_VID=null -DUSB_PID=null -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency);
 #endif
 	}
 	else
@@ -150,7 +170,7 @@ void UploadBase::linkerCommand(const QString &filePath, const QString &cpuType, 
 	QString hexPath = filePath + ".hex";
 
 	QString elf = create_elf_fileCommand(filePath, cpuType, staticLibraryPath, workPath, workingFrequency);
-//这部分到整合目录之后就可以统一了
+	//这部分到整合目录之后就可以统一了
 #ifdef Q_OS_WIN32
 	QString eep = create_eep_fileCommand("C:/arduino/hardware/tools/avr/bin/avr-objcopy", elfPath, eepPath);
 	QString hex = create_hex_fileCommand("C:/arduino/hardware/tools/avr/bin/avr-objcopy",elfPath, eepPath);
