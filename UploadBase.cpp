@@ -4,6 +4,7 @@
 #include <QFileInfo>
 #include <QDebug>
 #include <QRegExp>
+#include <QProcess>
 
 UploadBase::UploadBase(QObject *parent)
 	: QObject(parent)
@@ -16,6 +17,7 @@ UploadBase::UploadBase(QObject *parent)
 	, compiler_c("")
 	, compiler_cplusplus("")
 {
+	initData();
 }
 
 /**
@@ -37,10 +39,19 @@ UploadBase::UploadBase(const QString &serial, const QString &board, QObject *par
 	, compiler_c("")
 	, compiler_cplusplus("")
 {
+	initData();
 }
 
 UploadBase::~UploadBase()
 {
+}
+
+//init data
+void UploadBase::initData()
+{
+	pExternalProcess_ = new QProcess(this);
+	connect(pExternalProcess_, SIGNAL(readyReadStandardError), this, SLOT(slotreadyReadStandardError()));
+	connect(pExternalProcess_, SIGNAL(readyReadStandardOutput), this, SLOT(slotReadyReadStandardOutput()));
 }
 
 /**
@@ -606,4 +617,13 @@ void UploadBase::scanAllheaderFile(const QString &path)
 			scanAllheaderFile(dirPath);
 		}
 	}
+}
+
+
+void UploadBase::slotReadyReadStandardOutput()
+{
+}
+
+void UploadBase::slotreadyReadStandardError()
+{
 }

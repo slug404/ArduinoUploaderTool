@@ -2,19 +2,18 @@
 #define UPLOADBASE_H
 
 #include <QObject>
-#include <QSharedPointer>
-#include <QProcess>
 #include <QSet>
 #include <QMap>
+#include <QProcess>
 
 /**
  * @brief 库引用信息
  */
 struct LibraryReferenceInfor
 {
-    QString libName; /**< 库的名字(aa.h) */
-    QString libPath;/**< 库所在路径(arduino/libraries/aa) */
-    QSet<QString> libReference;/**< 该库所包含的其他库 */
+	QString libName; /**< 库的名字(aa.h) */
+	QString libPath;/**< 库所在路径(arduino/libraries/aa) */
+	QSet<QString> libReference;/**< 该库所包含的其他库 */
 };
 
 /*!
@@ -22,7 +21,7 @@ struct LibraryReferenceInfor
  */
 class UploadBase : public QObject
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
 	//扫描库相关
 	void scanAllLibraryHeaderFile(const QString &libraryPath);
@@ -52,39 +51,86 @@ public:
 	//上传
 	QString getUploadCommand(const QString &avrdudePath, const QString &configPath, const QString &cpuType, const QString &serialPort, const QString &baudrate, const QString &hexPath);
 	QMap<QString, LibraryReferenceInfor> map_libName_infor_;
+
+/*!
+* \brief 错误类型
+*/
+	enum UploaderError
+	{
+		SetupError,
+		CompileError,
+		WriteProError,
+		ClearError
+	};
+	void start();
+
 signals:
+	void signalSetupStart();
+	void signalCompileStart();
+	void signalWriteProStart();
+	void signalClearStart();
+
+	void signalSetupError();
+	void signalCompileError(const QString &errorString);
+	void signalWriteProError();
+	void signalClearError();
+
+	void signalSetupEnd();
+	void signalCompileEnd();
+	void signalWriteProEnd();
+	void signalClearEnd();
+
+	void signalError(UploaderError errorType);
+	void signalCompileProgress(float current, float total, int sec);
+	void signalWriteProProgress(float current, float total, int sec);
+
+	///////////////////////////////////
+	void signalTypeConversionError(const QString &error);
+	void signalPortError(const QString &error);
+	void signalBoardError(const QString &error);
 
 public slots:
+	void slotReadyReadStandardOutput();
+	void slotreadyReadStandardError();
+
+	void slotStateChanged(QProcess::ProcessState state);
+	void slotProcessError(QProcess::ProcessError error);
 
 protected:
-    //fucntion
-    explicit UploadBase(QObject *parent = 0);
-    explicit UploadBase(const QString &serial, const QString &board, QObject *parent = 0);
+	//fucntion
+	explicit UploadBase(QObject *parent = 0);
+	explicit UploadBase(const QString &serial, const QString &board, QObject *parent = 0);
 	virtual ~UploadBase();
 
-    QSet<QString> getAllChildDirPath(const QString &parentDirPath);
+	//init
+	void initData();
 
-    Q_DISABLE_COPY(UploadBase)
+	QSet<QString> getAllChildDirPath(const QString &parentDirPath);
 
-    //interface
-    virtual void setup() = 0; //! 准备
-    virtual void compile() = 0; //! 编译
-    virtual void writePro() = 0;//! 烧写
-    virtual void clear() = 0; //! 清理
+
+	Q_DISABLE_COPY(UploadBase)
+
+	//interface
+	virtual void setup() = 0; //! 准备
+	virtual void compile() = 0; //! 编译
+	virtual void writePro() = 0;//! 烧写
+	virtual void clear() = 0; //! 清理
+	virtual void readStandardOutput() = 0;
+	virtual void readStandardError() = 0;
 
 protected:
-    //data
-    QSharedPointer<QProcess> pExternalProcess_;//! 调用的外部程序指针
-    QString serialPort_;//! 串口号
-    QString boardType_;//! 板子类型
-    QString compilerPath_;
-    QString codePath_;
-    QString cmd_;
+	//data
+	QProcess pExternalProcess_;//! 调用的外部程序指针
+	QString serialPort_;//! 串口号
+	QString boardType_;//! 板子类型
+	QString compilerPath_;
+	QString codePath_;
+	QString cmd_;
 
 	QMultiMap<QString, QString> map_headerFile_path_;
-    QString compiler_c;
-    QString compiler_cplusplus;
-    QSet<QString> alreadyCompile_;
+	QString compiler_c;
+	QString compiler_cplusplus;
+	QSet<QString> alreadyCompile_;
 };
 
 #endif // UPLOADBASE_H
