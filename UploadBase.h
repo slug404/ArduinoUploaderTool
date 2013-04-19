@@ -23,6 +23,7 @@ class UploadBase : public QObject
 {
 	Q_OBJECT
 public:
+	virtual ~UploadBase();
 	//扫描库相关
 	void scanAllLibraryHeaderFile(const QString &libraryPath);
 	void scanAllheaderFile(const QString &path);
@@ -99,8 +100,7 @@ public slots:
 protected:
 	//fucntion
 	explicit UploadBase(QObject *parent = 0);
-	explicit UploadBase(const QString &serial, const QString &board, QObject *parent = 0);
-	virtual ~UploadBase();
+	explicit UploadBase(const QString &codePath, const QString &serial, const QString &board, QObject *parent = 0);
 
 	//init
 	void initData();
