@@ -10,9 +10,9 @@ class Uploader_Mac : public UploadBase
 {
 	Q_OBJECT
 public:
-	explicit Uploader_Mac(QObject *parent = 0);
 	explicit Uploader_Mac(const QString &codePath, const QString &serial, const QString &board, QObject *parent = 0);
 	virtual ~Uploader_Mac();
+
 signals:
 	
 public slots:
