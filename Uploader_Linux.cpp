@@ -11,10 +11,6 @@ Uploader_Linux::~Uploader_Linux()
 {
 }
 
-void Uploader_Linux::writePro()
-{
-}
-
 void Uploader_Linux::clear()
 {
 }

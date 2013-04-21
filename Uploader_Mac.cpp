@@ -15,10 +15,6 @@ void Uploader_Mac::clear()
 {
 }
 
-void Uploader_Mac::writePro()
-{
-}
-
 void Uploader_Mac::readStandardError()
 {
 }

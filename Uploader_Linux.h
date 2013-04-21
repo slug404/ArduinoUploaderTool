@@ -18,7 +18,6 @@ public slots:
 
 protected:
 	//interface
-	virtual void writePro();//! 烧写
 	virtual void clear(); //! 清理
 	virtual void readStandardOutput();
 	virtual void readStandardError();
