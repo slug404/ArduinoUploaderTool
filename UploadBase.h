@@ -126,7 +126,7 @@ protected:
 	//interface
 	virtual void prepare(); //! 准备
 	virtual void compile(); //! 编译
-	virtual void writePro() = 0;//! 烧写
+    virtual void writePro();//! 烧写
 	virtual void clear() = 0; //! 清理
 	virtual void readStandardOutput() = 0;
 	virtual void readStandardError() = 0;
@@ -144,6 +144,7 @@ protected:
 	QMap<QString, LibraryReferenceInfor> map_libName_infor_;
 	QMultiMap<QString, QString> map_headerFile_path_;
 	QMap<int, Board> map_boardIndex_infor_;
+    QString hexPath_;
 };
 
 #endif // UPLOADBASE_H
