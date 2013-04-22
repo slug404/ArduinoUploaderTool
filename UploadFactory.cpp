@@ -8,25 +8,25 @@ UploadFactory::UploadFactory(QObject *parent)
 {
 }
 
-QSharedPointer<UploadBase> UploadFactory::create(UploadFactory::UploadPlatform platformType, const QString &codePath, const QString &serial, const QString &board)
+QSharedPointer<UploadBase> UploadFactory::create(UploadFactory::UploadPlatform platformType, const QString &codePath, const QString &serial, int boardIndex)
 {
 	switch (platformType)
 	{
 		case OS_WINDOWS:
 		{
-			return QSharedPointer<UploadBase>(new Uploader_Windows(codePath, serial, board));
+			return QSharedPointer<UploadBase>(new Uploader_Windows(codePath, serial, boardIndex));
 		}
 		case OS_LINUX:
 		{
-			return QSharedPointer<UploadBase>(new Uploader_Linux(codePath, serial, board));
+			return QSharedPointer<UploadBase>(new Uploader_Linux(codePath, serial, boardIndex));
 		}
 		case OS_MAC:
 		{
-			return QSharedPointer<UploadBase>(new Uploader_Mac(codePath, serial, board));
+			return QSharedPointer<UploadBase>(new Uploader_Mac(codePath, serial, boardIndex));
 		}
 		default:
 		{
-			return QSharedPointer<UploadBase>(new Uploader_Windows(codePath, serial, board));//Windows用户最多
+			return QSharedPointer<UploadBase>(new Uploader_Windows(codePath, serial, boardIndex));//Windows用户最多
 		}
 	}
 }

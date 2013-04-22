@@ -23,12 +23,7 @@ public:
 		OS_MAC/**< Mac平台*/
 	};
 
-	static QSharedPointer<UploadBase> create(UploadPlatform platformType, const QString &codePath, const QString &serial, const QString &board);
-
-signals:
-	
-public slots:
-	
+	static QSharedPointer<UploadBase> create(UploadPlatform platformType, const QString &codePath, const QString &serial, int boardIndex);
 };
 
 #endif // UPLOADFACTORY_H
