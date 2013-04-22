@@ -486,7 +486,12 @@ void UploadBase::writePro()
     {
         QString mcu = map_boardIndex_infor_[boardIndex_].mcu;
         QString baudrate = map_boardIndex_infor_[boardIndex_].baudrate;
-        QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, serialPort_, baudrate, hexPath_);
+#ifdef Q_OS_LINUX
+		QString cmd = getUploadCommand("./Arduino/hardware/tools/avrdude", "./Arduino/hardware/tools/avrdude.conf", mcu, QString("/dev/") + serialPort_, baudrate, hexPath_);
+#else
+		QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, serialPort_, baudrate, hexPath_);
+#endif
+
         qDebug() << cmd;
         pExternalProcess_->execute(cmd);
     }
