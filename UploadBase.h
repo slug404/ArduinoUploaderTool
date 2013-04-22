@@ -88,12 +88,9 @@ public slots:
 	void slotReadyReadStandardOutput();
 	void slotreadyReadStandardError();
 
-	void slotStateChanged(QProcess::ProcessState state);
-	void slotProcessError(QProcess::ProcessError error);
-
 protected:
 	//fucntion
-	explicit UploadBase(const QString &codePath, const QString &serial, const QString &board, QObject *parent = 0);
+	explicit UploadBase(const QString &codePath, const QString &serial, int boardIndex, QObject *parent = 0);
 
 	//扫描库相关
 	void scanAllLibraryHeaderFile(const QString &libraryPath);
@@ -105,7 +102,7 @@ protected:
 	QSet<QString> getAllMatchResults(const QString text, const QString regexp = "\\w+\\.h");
 
 	//递归编译指定目录以及其子目录中所有*c,*cpp
-	void compileLibrary(const QString libraryDirPath);
+	void compileLibrary(const QString &libraryDirPath, const QString &mcu);
 
 	//给QProcess调用
 	//编译
@@ -127,8 +124,8 @@ protected:
 	Q_DISABLE_COPY(UploadBase)
 
 	//interface
-	virtual void setup() = 0; //! 准备
-	virtual void compile() = 0; //! 编译
+	virtual void prepare(); //! 准备
+	virtual void compile(); //! 编译
 	virtual void writePro() = 0;//! 烧写
 	virtual void clear() = 0; //! 清理
 	virtual void readStandardOutput() = 0;
@@ -138,16 +135,15 @@ protected:
 	//data
 	QProcess *pExternalProcess_;//! 调用的外部程序指针
 	QString serialPort_;//! 串口号
-	QString boardType_;//! 板子类型
+	int boardIndex_;//! 板子类型
 	QString compilerPath_;
 	QString codePath_;
 	QString cmd_;
+	QSet<QString> alreadyCompile_;
+	QSet<QString> libraryPaths_;
 	QMap<QString, LibraryReferenceInfor> map_libName_infor_;
 	QMultiMap<QString, QString> map_headerFile_path_;
-	QMap<int, Board> map_boardIndex_Infor_;
-	QString compiler_c;
-	QString compiler_cplusplus;
-	QSet<QString> alreadyCompile_;
+	QMap<int, Board> map_boardIndex_infor_;
 };
 
 #endif // UPLOADBASE_H

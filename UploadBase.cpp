@@ -14,16 +14,14 @@
  * @param [in] debug debug模式?
  * @param [in] parent
  */
-UploadBase::UploadBase(const QString &codePath, const QString &serial, const QString &board, QObject *parent)
+UploadBase::UploadBase(const QString &codePath, const QString &serial, int boardIndex, QObject *parent)
 	: QObject(parent)
 	, pExternalProcess_(NULL)
 	, serialPort_(serial)
-	, boardType_(board)
+	, boardIndex_(boardIndex)
 	, compilerPath_("")
 	, codePath_(codePath)
 	, cmd_("")
-	, compiler_c("")
-	, compiler_cplusplus("")
 {
 	pExternalProcess_ = new QProcess(this);
 	connect(pExternalProcess_, SIGNAL(readyReadStandardError()), this, SLOT(slotreadyReadStandardError()));
@@ -31,27 +29,35 @@ UploadBase::UploadBase(const QString &codePath, const QString &serial, const QSt
 
 	//init board information
 	{
-		map_boardIndex_Infor_[0] = Board("Arduino Uno", "atmega328p", "standard", "115200", 32768);
-		map_boardIndex_Infor_[1] = Board("Arduino Leonardo", "atmega32u4", "leonardo", "57600", 32768);
-		map_boardIndex_Infor_[2] = Board("Arduino Esplora", "atmega32u4", "leonardo", "57600", 32768);
-		map_boardIndex_Infor_[3] = Board("Arduino Micro", "atmega32u4", "micro", "57600", 32768);
-		map_boardIndex_Infor_[4] = Board("Arduino Duemilanove (328)", "atmega328p", "standard", "57600", 32768);
-		map_boardIndex_Infor_[5] = Board("Arduino Duemilanove (168)", "atmega168", "standard", "19200", 16384);
-		map_boardIndex_Infor_[6] = Board("Arduino Nano (328)", "atmega328p", "eightanaloginputs", "57600", 32768);
-		map_boardIndex_Infor_[7] = Board("Arduino Nano (168)", "atmega168", "eightanaloginputs", "19200", 16384);
-		map_boardIndex_Infor_[8] = Board("Arduino Mini (328)", "atmega328p", "eightanaloginputs", "57600", 32768);
-		map_boardIndex_Infor_[9] = Board("Arduino Mini (168)", "atmega168", "eightanaloginputs", "19200", 16384);
-		map_boardIndex_Infor_[10] = Board("Arduino Pro Mini (328)", "atmega328p", "standard", "57600", 32768);
-		map_boardIndex_Infor_[11] = Board("Arduino Pro Mini (168)", "atmega168p", "standard", "19200", 16384);
-		map_boardIndex_Infor_[12] = Board("Arduino Mega 2560/ADK", "atmega2560", "mega", "115200", 262144);
-		map_boardIndex_Infor_[13] = Board("Arduino Mega 1280", "atmega1280", "mega", "57600", 131072);
-		map_boardIndex_Infor_[14] = Board("Arduino Mega 8", "atmega8", "standard", "19200", 8192);
-		map_boardIndex_Infor_[15] = Board("Microduino Core+ (644P)", "atmega644p", "plus", "115200", 65536);
+		map_boardIndex_infor_[0] = Board("Arduino Uno", "atmega328p", "standard", "115200", 32768);
+		map_boardIndex_infor_[1] = Board("Arduino Leonardo", "atmega32u4", "leonardo", "57600", 32768);
+		map_boardIndex_infor_[2] = Board("Arduino Esplora", "atmega32u4", "leonardo", "57600", 32768);
+		map_boardIndex_infor_[3] = Board("Arduino Micro", "atmega32u4", "micro", "57600", 32768);
+		map_boardIndex_infor_[4] = Board("Arduino Duemilanove (328)", "atmega328p", "standard", "57600", 32768);
+		map_boardIndex_infor_[5] = Board("Arduino Duemilanove (168)", "atmega168", "standard", "19200", 16384);
+		map_boardIndex_infor_[6] = Board("Arduino Nano (328)", "atmega328p", "eightanaloginputs", "57600", 32768);
+		map_boardIndex_infor_[7] = Board("Arduino Nano (168)", "atmega168", "eightanaloginputs", "19200", 16384);
+		map_boardIndex_infor_[8] = Board("Arduino Mini (328)", "atmega328p", "eightanaloginputs", "57600", 32768);
+		map_boardIndex_infor_[9] = Board("Arduino Mini (168)", "atmega168", "eightanaloginputs", "19200", 16384);
+		map_boardIndex_infor_[10] = Board("Arduino Pro Mini (328)", "atmega328p", "standard", "57600", 32768);
+		map_boardIndex_infor_[11] = Board("Arduino Pro Mini (168)", "atmega168p", "standard", "19200", 16384);
+		map_boardIndex_infor_[12] = Board("Arduino Mega 2560/ADK", "atmega2560", "mega", "115200", 262144);
+		map_boardIndex_infor_[13] = Board("Arduino Mega 1280", "atmega1280", "mega", "57600", 131072);
+		map_boardIndex_infor_[14] = Board("Arduino Mega 8", "atmega8", "standard", "19200", 8192);
+		map_boardIndex_infor_[15] = Board("Microduino Core+ (644P)", "atmega644p", "plus", "115200", 65536);
 	}
 }
 
 UploadBase::~UploadBase()
 {
+}
+
+void UploadBase::start()
+{
+	prepare();//prepare to compile
+	compile();//compileLibrary, linkerCommand
+	writePro();//getUploadCommand, and call QProcess to execute
+	clear();
 }
 
 /**
@@ -276,7 +282,7 @@ QString UploadBase::getUploadCommand(const QString &avrdudePath, const QString &
  * @brief 递归编译指定库目录中的所有*c,*cpp
  * @param [in] libraryDirPath 库目录路径
  */
-void UploadBase::compileLibrary(const QString libraryDirPath)
+void UploadBase::compileLibrary(const QString &libraryDirPath, const QString &mcu)
 {
 	QDir dir(libraryDirPath);
 	QStringList filters;
@@ -324,7 +330,7 @@ void UploadBase::compileLibrary(const QString libraryDirPath)
 		}
 
 		//编译本文件
-		QString cmd = getCompilerCommand(filePath, "atmega328p", libPaths.toList());
+		QString cmd = getCompilerCommand(filePath, mcu, libPaths.toList());
 		qDebug() << cmd;
 		alreadyCompile_.clear();
 	}
@@ -348,7 +354,7 @@ void UploadBase::compileLibrary(const QString libraryDirPath)
 			{
 				continue;
 			}
-			compileLibrary(libraryDirPath + "/" + dirName);
+			compileLibrary(libraryDirPath + "/" + dirName, mcu);
 		}
 	}
 }
@@ -446,6 +452,41 @@ bool UploadBase::copyFile(const QString &srcPath, const QString &desPath)
 	desFile.close();
 
 	return true;
+}
+
+void UploadBase::prepare()
+{
+	QSet<QString> headerFiles = getReferenceHeaderFilesFromSingleFile(codePath_);
+	QSet<QString> tmpLibDirPath;
+	foreach (const QString header, headerFiles)
+	{
+		if(map_libName_infor_.contains(header))
+		{
+			tmpLibDirPath << map_libName_infor_.value(header).libPath;
+		}
+	}
+
+	libraryPaths_ = tmpLibDirPath;
+}
+
+void UploadBase::compile()
+{
+	//这里的CPU类型是需要通过一个数据结构获取的
+	if(map_boardIndex_infor_.contains(boardIndex_))
+	{
+		QString mcu = map_boardIndex_infor_[boardIndex_].mcu;
+		QString cmd = getCompilerCommand(codePath_, mcu, libraryPaths_.toList());
+		pExternalProcess_->execute(cmd);
+		foreach (const QString &dirPath, libraryPaths_)
+		{
+			compileLibrary(dirPath, mcu);
+		}
+	}
+	else
+	{
+		qDebug() << "can't find index: "<< boardIndex_;
+		return;
+	}
 }
 
 /**
@@ -650,12 +691,4 @@ void UploadBase::slotReadyReadStandardOutput()
 void UploadBase::slotreadyReadStandardError()
 {
 	readStandardError();
-}
-
-void UploadBase::slotStateChanged(QProcess::ProcessState state)
-{
-}
-
-void UploadBase::slotProcessError(QProcess::ProcessError error)
-{
 }
