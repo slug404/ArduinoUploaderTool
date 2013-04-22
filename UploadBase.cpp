@@ -188,6 +188,10 @@ void UploadBase::linkerCommand(const QString &filePath, const QString &cpuType, 
 	QString hex = create_hex_fileCommand("./Arduino/hardware/tools/avr/bin/avr-objcopy",elfPath, hexPath);
 #endif
 
+	qDebug() << "elf: " << elf;
+	qDebug() << "eep: " << eep;
+	qDebug() << "hex: " << hex;
+
 	//调用QProcess
 	if(pExternalProcess_)
 	{
@@ -332,6 +336,7 @@ void UploadBase::compileLibrary(const QString &libraryDirPath, const QString &mc
 		//编译本文件
 		QString cmd = getCompilerCommand(filePath, mcu, libPaths.toList());
 		qDebug() << cmd;
+		pExternalProcess_->execute(cmd);
 		alreadyCompile_.clear();
 	}
 
@@ -476,11 +481,14 @@ void UploadBase::compile()
 	{
 		QString mcu = map_boardIndex_infor_[boardIndex_].mcu;
 		QString cmd = getCompilerCommand(codePath_, mcu, libraryPaths_.toList());
+		qDebug() << cmd;
 		pExternalProcess_->execute(cmd);
 		foreach (const QString &dirPath, libraryPaths_)
 		{
 			compileLibrary(dirPath, mcu);
 		}
+
+		linkerCommand(codePath_, mcu, "./Temp/core.a");
 	}
 	else
 	{
