@@ -3,6 +3,7 @@
 #include <QDir>
 #include <QFile>
 #include <QMap>
+#include <QSharedPointer>
 #include "Uploader_Windows.h"
 #include "Uploader_Linux.h"
 #include "Uploader_Mac.h"
@@ -25,46 +26,14 @@ int main(int argc, char *argv[])
 		QString fileName = argv[1];
 		QString board = argv[2];
 		QString serialPort = argv[3];
-
-//		QSet<QString> headerFiles = test.getReferenceHeaderFilesFromSingleFile("imu.cpp");
-//		QSet<QString> tmpLibDirPath;
-//		foreach (const QString header, headerFiles)
-//		{
-//			if(test.map_libName_infor_.contains(header))
-//			{
-//				tmpLibDirPath << test.map_libName_infor_.value(header).libPath;
-//			}
-//		}
-
-//		QString cmd = test.getCompilerCommand("imu.cpp", "atmega328p", tmpLibDirPath.toList());
-//		foreach (const QString &dirPath, tmpLibDirPath)
-//		{
-//			test.compileLibrary(dirPath);
-//		}
-
-		{
-			//这里要清理
-//#ifdef Q_OS_WIN32
-//			cmd =  test.create_elf_fileCommand("imu.cpp", "atmega328p", "C:/Temp/core.a");
-
-//			cmd = test.create_eep_fileCommand("C:/arduino/hardware/tools/avr/bin/avr-objcopy", QString("./Temp/" )+ "imu.elf", QString("./Temp/") + "imu.eep");
-
-//			cmd = test.create_hex_fileCommand("C:/arduino/hardware/tools/avr/bin/avr-objcopy", QString("./Temp/" ) + "imu.elf", QString("./Temp/") + "imu.hex");
-
-//			cmd = test.getUploadCommand("C:/arduino/hardware/tools/avr/bin/avrdude", "C:/arduino/hardware/tools/avr/etc/avrdude.conf"
-//										, "atmega328p", "COM6", "115200", "./Temp/imu.hex");
-//#else
-//			cmd =  test.create_elf_fileCommand("imu.cpp", "atmega328p", "./Temp/core.a");
-
-//			cmd = test.create_eep_fileCommand("./Arduino/hardware/tools/avr/bin/avr-objcopy", QString("./Temp/" )+ "imu.elf", QString("./Temp/") + "imu.eep");
-
-//			cmd = test.create_hex_fileCommand("./Arduino/hardware/tools/avr/bin/avr-objcopy", QString("./Temp/" ) + "imu.elf", QString("./Temp/") + "imu.hex");
-
-//			cmd = test.getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "C:/arduino/hardware/tools/avr/etc/avrdude.conf"
-//										, "atmega328p", "tty.usbmodem1d1321", "115200", "./Temp/imu.hex");
-//#endif
-		}
-
+#ifdef Q_OS_WIN32
+		QSharedPointer<UploadBase> pUploader = UploadFactory::create(UploadFactory::OS_WINDOWS, fileName, serialPort, board.toInt());
+#elif defined(Q_OS_LINUX)
+		QSharedPointer<UploadBase> pUploader = UploadFactory::create(UploadFactory::OS_LINUX, fileName, serialPort, board.toInt());
+#elif defined(Q_OS_MAC)
+		QSharedPointer<UploadBase> pUploader = UploadFactory::create(UploadFactory::OS_MAC, fileName, serialPort, board.toInt());
+#endif
+		pUploader->start();
 	}
 	else
 	{
