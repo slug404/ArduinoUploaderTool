@@ -120,7 +120,8 @@ QSet<QString> UploadBase::getAllChildDirPath(const QString &parentDirPath)
  * @param [in] workingFrequency 开发版的工作频率
  * @return
  */
-QString UploadBase::getCompilerCommand(const QString &sketchPath, const QString &cpuType, const QString &var, const QList<QString> &libPaths, QString workPath, QString workingFrequency)
+QString UploadBase::getCompilerCommand(const QString &sketchPath, const QString &cpuType,
+                                       const QString &var, const QList<QString> &libPaths, QString workingFrequency, QString workPath)
 {
     QFileInfo infor(sketchPath);
     QString suffix = infor.suffix();
@@ -128,21 +129,32 @@ QString UploadBase::getCompilerCommand(const QString &sketchPath, const QString 
 
     QString id = QString("-DUSB_VID=null -DUSB_PID=null");
     {
-        if("leonardo" == var
-                && infor.baseName() == QFileInfo(codePath_).baseName())
+        if(infor.baseName() == QFileInfo(codePath_).baseName())
         {
             //针对leonardo特殊的处理
+            if ("leonardo" == var)
+            {
+                id = " -DUSB_VID=0x2341 -DUSB_PID=0x8036";
+            }
+            else if ("Micro" == var)
+            {
+                id = " -DUSB_VID=0x2341 -DUSB_PID=0x8037";
+            }
+            else if ("Esplora" == var)
+            {
+                id = " -DUSB_VID=0x2341 -DUSB_PID=0x803C";
+            }
         }
     }
     if("c" == suffix
             || "C" == suffix)
     {
-        cmd = QString("%1/avr-gcc -c -g -Os -Wall -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3L -MMD %4 -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency).arg(id);
+        cmd = QString("%1/avr-gcc -c -g -Os -Wall -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3 -MMD %4 -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency).arg(id);
     }
     else if("cpp" == suffix
             || "CPP" == suffix)
     {
-        cmd = QString("%1/avr-g++ -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3L -MMD %4 -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency).arg(id);
+        cmd = QString("%1/avr-g++ -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3 -MMD %4 -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency).arg(id);
     }
     else
     {
@@ -183,13 +195,13 @@ QString UploadBase::getCompilerCommand(const QString &sketchPath, const QString 
  * @param workPath
  * @param workingFrequency
  */
-void UploadBase::linkerCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath, QString workingFrequency)
+void UploadBase::linkerCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath)
 {
     QString elfPath = filePath + ".elf";
     QString eepPath = filePath + ".eep";
     QString hexPath = filePath + ".hex";
     hexPath_ = hexPath;
-    QString elf = create_elf_fileCommand(filePath, cpuType, staticLibraryPath, workPath, workingFrequency);
+    QString elf = create_elf_fileCommand(filePath, cpuType, staticLibraryPath, workPath);
     //这部分到整合目录之后就可以统一了
     QString eep = create_eep_fileCommand("./Arduino/hardware/tools/avr/bin/avr-objcopy", elfPath, eepPath);
     QString hex = create_hex_fileCommand("./Arduino/hardware/tools/avr/bin/avr-objcopy",elfPath, hexPath);
@@ -216,7 +228,7 @@ void UploadBase::linkerCommand(const QString &filePath, const QString &cpuType, 
  * @param [in] workingFrequency 开发版的工作频率, 默认16Mhz目前不做使用
  * @return 可以扔给avr-gcc的命令
  */
-QString UploadBase::create_elf_fileCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath, QString workingFrequency)
+QString UploadBase::create_elf_fileCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath)
 {
     QString baseName = QFileInfo(filePath).fileName();
     QString cmd = QString("%1 -Os -Wl,--gc-sections -mmcu=%2 -o %3 ").arg("./Arduino/hardware/tools/avr/bin/avr-gcc").arg(cpuType).arg(workPath + "/" + baseName + ".elf");
@@ -290,7 +302,7 @@ QString UploadBase::getUploadCommand(const QString &avrdudePath, const QString &
  * @brief 递归编译指定库目录中的所有*c,*cpp
  * @param [in] libraryDirPath 库目录路径
  */
-void UploadBase::compileLibrary(const QString &libraryDirPath, const QString &mcu, const QString &var)
+void UploadBase::compileLibrary(const QString &libraryDirPath, const QString &mcu, const QString &var, const QString &workFrequency)
 {
     QDir dir(libraryDirPath);
     QStringList filters;
@@ -363,7 +375,7 @@ void UploadBase::compileLibrary(const QString &libraryDirPath, const QString &mc
             {
                 continue;
             }
-            compileLibrary(libraryDirPath + "/" + dirName, mcu, var);
+            compileLibrary(libraryDirPath + "/" + dirName, mcu, var, workFrequency);
         }
     }
 }
@@ -485,12 +497,13 @@ void UploadBase::compile()
     {
         QString mcu = map_boardIndex_infor_[boardIndex_].mcu;
         QString var = map_boardIndex_infor_[boardIndex_].variant;
-        QString cmd = getCompilerCommand(codePath_, mcu, var, libraryPaths_.toList());
+        QString frequency = map_boardIndex_infor_[boardIndex_].workingFrequency;
+        QString cmd = getCompilerCommand(codePath_, mcu, var, libraryPaths_.toList(), frequency);
         qDebug() << cmd;
         pExternalProcess_->execute(cmd);
         foreach (const QString &dirPath, libraryPaths_)
         {
-            compileLibrary(dirPath, mcu, var);
+            compileLibrary(dirPath, mcu, var, frequency);
         }
 
         linkerCommand(codePath_, mcu, "./Temp/core.a");

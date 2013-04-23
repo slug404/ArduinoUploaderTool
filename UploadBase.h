@@ -106,14 +106,15 @@ protected:
     QSet<QString> getAllMatchResults(const QString text, const QString regexp = "\\w+\\.h");
 
     //递归编译指定目录以及其子目录中所有*c,*cpp
-    void compileLibrary(const QString &libraryDirPath, const QString &mcu, const QString &var);
+    void compileLibrary(const QString &libraryDirPath, const QString &mcu, const QString &var, const QString &workFrequency);
 
     //给QProcess调用
     //编译
-    QString getCompilerCommand(const QString &sketchPath, const QString &cpuType, const QString &var, const QList<QString> &libPaths, QString workPath = "./Temp", QString workingFrequency = "16000000");
+    QString getCompilerCommand(const QString &sketchPath, const QString &cpuType,
+                               const QString &var, const QList<QString> &libPaths, QString workingFrequency = "16000000L", QString workPath = "./Temp");
     //链接
-    void linkerCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath = "./Temp", QString workingFrequency = "16000000");
-    QString create_elf_fileCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath = "./Temp", QString workingFrequency = "16000000");
+    void linkerCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath = "./Temp");
+    QString create_elf_fileCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath = "./Temp");
     QString create_eep_fileCommand(const QString &toolPath, const QString &elfPath, const QString &eepPath);
     QString create_hex_fileCommand(const QString &toolPath, const QString &elfPath, const QString &hexPath);
 
