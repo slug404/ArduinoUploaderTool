@@ -120,32 +120,38 @@ QSet<QString> UploadBase::getAllChildDirPath(const QString &parentDirPath)
  * @param [in] workingFrequency 开发版的工作频率
  * @return
  */
-QString UploadBase::getCompilerCommand(const QString &sketchPath, const QString &cpuType, const QList<QString> &libPaths, QString workPath, QString workingFrequency)
+QString UploadBase::getCompilerCommand(const QString &sketchPath, const QString &cpuType, const QString &var, const QList<QString> &libPaths, QString workPath, QString workingFrequency)
 {
     QFileInfo infor(sketchPath);
     QString suffix = infor.suffix();
     QString cmd;
+
+    QString id = QString("-DUSB_VID=null -DUSB_PID=null");
+    {
+        if("leonardo" == var
+                && infor.baseName() == QFileInfo(codePath_).baseName())
+        {
+            //针对leonardo特殊的处理
+        }
+    }
     if("c" == suffix
             || "C" == suffix)
     {
-        cmd = QString("%1/avr-gcc -c -g -Os -Wall -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3L -MMD -DUSB_VID=null -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency);
+        cmd = QString("%1/avr-gcc -c -g -Os -Wall -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3L -MMD %4 -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency).arg(id);
     }
     else if("cpp" == suffix
             || "CPP" == suffix)
     {
-        cmd = QString("%1/avr-g++ -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3L -MMD -DUSB_VID=null -DUSB_PID=null -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency);
+        cmd = QString("%1/avr-g++ -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3L -MMD %4 -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency).arg(id);
     }
     else
     {
         return QString();
     }
-#ifdef Q_OS_WIN32
+
     cmd += "-I./Arduino/hardware/arduino/cores/arduino ";
     cmd += "-I./Arduino/hardware/arduino/variants/standard ";
-#else
-    cmd += "-I./Arduino/hardware/arduino/cores/arduino ";
-    cmd += "-I./Arduino/hardware/arduino/variants/standard ";
-#endif
+
     //加引用路径
     for(int i = 0; i != libPaths.size(); ++i)
     {
@@ -284,7 +290,7 @@ QString UploadBase::getUploadCommand(const QString &avrdudePath, const QString &
  * @brief 递归编译指定库目录中的所有*c,*cpp
  * @param [in] libraryDirPath 库目录路径
  */
-void UploadBase::compileLibrary(const QString &libraryDirPath, const QString &mcu)
+void UploadBase::compileLibrary(const QString &libraryDirPath, const QString &mcu, const QString &var)
 {
     QDir dir(libraryDirPath);
     QStringList filters;
@@ -332,7 +338,7 @@ void UploadBase::compileLibrary(const QString &libraryDirPath, const QString &mc
         }
 
         //编译本文件
-        QString cmd = getCompilerCommand(filePath, mcu, libPaths.toList());
+        QString cmd = getCompilerCommand(filePath, mcu, var, libPaths.toList());
         qDebug() << cmd;
         pExternalProcess_->execute(cmd);
         alreadyCompile_.clear();
@@ -357,7 +363,7 @@ void UploadBase::compileLibrary(const QString &libraryDirPath, const QString &mc
             {
                 continue;
             }
-            compileLibrary(libraryDirPath + "/" + dirName, mcu);
+            compileLibrary(libraryDirPath + "/" + dirName, mcu, var);
         }
     }
 }
@@ -478,12 +484,13 @@ void UploadBase::compile()
     if(map_boardIndex_infor_.contains(boardIndex_))
     {
         QString mcu = map_boardIndex_infor_[boardIndex_].mcu;
-        QString cmd = getCompilerCommand(codePath_, mcu, libraryPaths_.toList());
+        QString var = map_boardIndex_infor_[boardIndex_].variant;
+        QString cmd = getCompilerCommand(codePath_, mcu, var, libraryPaths_.toList());
         qDebug() << cmd;
         pExternalProcess_->execute(cmd);
         foreach (const QString &dirPath, libraryPaths_)
         {
-            compileLibrary(dirPath, mcu);
+            compileLibrary(dirPath, mcu, var);
         }
 
         linkerCommand(codePath_, mcu, "./Temp/core.a");
@@ -501,6 +508,11 @@ void UploadBase::writePro()
     {
         QString mcu = map_boardIndex_infor_[boardIndex_].mcu;
         QString baudrate = map_boardIndex_infor_[boardIndex_].baudrate;
+
+        if("leonardo" == map_boardIndex_infor_[boardIndex_].variant)
+        {
+
+        }
 #ifdef Q_OS_WIN32
         QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, serialPort_, baudrate, hexPath_);
 #elif defined(Q_OS_LINUX)
