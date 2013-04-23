@@ -30,21 +30,37 @@ UploadBase::UploadBase(const QString &codePath, const QString &serial, int board
 
     //init board information
     {
-		map_boardIndex_infor_[0] = Board("Arduino Uno", "atmega328p", "standard", "115200","Uno.a", 32768);
-		map_boardIndex_infor_[1] = Board("Arduino Leonardo", "atmega32u4", "leonardo", "57600","Leonardo.a", 32768);
-		map_boardIndex_infor_[2] = Board("Arduino Esplora", "atmega32u4", "leonardo", "57600","Esplora.a", 32768);
-		map_boardIndex_infor_[3] = Board("Arduino Micro", "atmega32u4", "micro", "57600","Micro.a", 32768);
-		map_boardIndex_infor_[4] = Board("Arduino Duemilanove (328)", "atmega328p", "standard", "57600","Duemilanove328.a", 32768);
-		map_boardIndex_infor_[5] = Board("Arduino Duemilanove (168)", "atmega168", "standard", "19200","Duemilanove168.a", 16384);
-		map_boardIndex_infor_[6] = Board("Arduino Nano (328)", "atmega328p", "eightanaloginputs", "57600","Nano328.a", 32768);
-		map_boardIndex_infor_[7] = Board("Arduino Nano (168)", "atmega168", "eightanaloginputs", "19200","Nano168.a", 16384);
-		map_boardIndex_infor_[8] = Board("Arduino Mini (328)", "atmega328p", "eightanaloginputs", "57600","Mini328.a", 32768);
-		map_boardIndex_infor_[9] = Board("Arduino Mini (168)", "atmega168", "eightanaloginputs", "19200","Mini168.a", 16384);
-		map_boardIndex_infor_[10] = Board("Arduino Pro Mini (328)", "atmega328p", "standard", "57600", "ProMini328.a", 32768);
-		map_boardIndex_infor_[11] = Board("Arduino Pro Mini (168)", "atmega168p", "standard", "19200", "ProMini168.a", 16384);
-		map_boardIndex_infor_[12] = Board("Arduino Mega 2560/ADK", "atmega2560", "mega", "115200", "Mega2560.a", 262144);
-		map_boardIndex_infor_[13] = Board("Arduino Mega 1280", "atmega1280", "mega", "57600", "Mega1280.a", 131072);
-		map_boardIndex_infor_[14] = Board("Arduino Mega 8", "atmega8", "standard", "19200", "Mega8.a", 8192);
+        map_boardIndex_infor_[0] = Board("Arduino Uno", "atmega328p", "standard", "115200","Uno.a", "16000000L", 32256);
+        map_boardIndex_infor_[1] = Board("Arduino Duemilanove (328)", "atmega328p", "standard", "57600","Duemilanove328.a", "16000000L", 30720);
+        map_boardIndex_infor_[2] = Board("Arduino Duemilanove (168)", "atmega168", "standard", "19200","Duemilanove168.a", "16000000L", 14336);
+        map_boardIndex_infor_[3] = Board("Arduino Nano (328)", "atmega328p", "eightanaloginputs", "57600","Nano328.a", "16000000L", 30720);
+        map_boardIndex_infor_[4] = Board("Arduino Nano (168)", "atmega168", "eightanaloginputs", "19200","Nano168.a", "16000000L", 14336);
+        map_boardIndex_infor_[5] = Board("Arduino Mega 2560/ADK", "atmega2560", "mega", "115200", "Mega2560.a", "16000000L", 258048);
+        map_boardIndex_infor_[6] = Board("Arduino Mega 1280", "atmega1280", "mega", "57600", "Mega1280.a", "16000000L", 126976);
+        map_boardIndex_infor_[7] = Board("Arduino Leonardo", "atmega32u4", "leonardo", "57600","Leonardo.a", "16000000L", 28672);
+        map_boardIndex_infor_[8] = Board("Arduino Esplora", "atmega32u4", "leonardo", "57600","Esplora.a", "16000000L", 28672);
+        map_boardIndex_infor_[9] = Board("Arduino Micro", "atmega32u4", "micro", "57600","Micro.a", "16000000L", 28672);
+        map_boardIndex_infor_[10] = Board("Arduino Mini (328)", "atmega328p", "eightanaloginputs", "115200","Mini328.a", "16000000L", 28672);
+        map_boardIndex_infor_[11] = Board("Arduino Mini (168)", "atmega168", "eightanaloginputs", "19200","Mini168.a", "16000000L", 14336);
+        //Ethernet
+        map_boardIndex_infor_[12] = Board("Arduino Ethernet", "atmega328p", "standard", "115200", "Ethernet.a", "16000000L", 32256);
+        //Fio
+        map_boardIndex_infor_[13] = Board("Arduino Fio", "atmega328p", "eightanaloginputs", "57600","Fio.a", "8000000L", 30720);
+        //BT
+        map_boardIndex_infor_[14] = Board("Arduino BT (328)", "atmega328p", "eightanaloginputs", "19200","BT328.a", "16000000L", 28672);
+        map_boardIndex_infor_[15] = Board("Arduino Esplora", "atmega168", "eightanaloginputs", "19200","BT168.a", "16000000L", 14336);
+        //LilyPad
+        map_boardIndex_infor_[16] = Board("LilyPad Arduino USB", "atmega32u4", "leonardo", "57600","LilyPadUsb.a", "8000000L", 28672);
+        map_boardIndex_infor_[17] = Board("LilyPad Arduino (328)", "atmega328p", "standard", "57600","LilyPad328.a", "8000000L", 30720);
+        map_boardIndex_infor_[18] = Board("LilyPad Arduino (168)", "atmega168", "standard", "19200","LilyPad168.a", "8000000L", 14336);
+        //ProMini
+        map_boardIndex_infor_[19] = Board("Arduino Pro Mini (328) 5V", "atmega328p", "standard", "57600", "ProMini328_5.a", "16000000L", 30720);
+        map_boardIndex_infor_[20] = Board("Arduino Pro Mini (168) 5V", "atmega168", "standard", "19200", "ProMini168_5.a", "16000000L", 14336);
+        map_boardIndex_infor_[21] = Board("Arduino Pro Mini (328) 3.3V", "atmega328p", "standard", "57600", "ProMini328_3.a", "8000000L", 30720);
+        map_boardIndex_infor_[22] = Board("Arduino Pro Mini (168) 3.3V", "atmega168", "standard", "19200", "ProMini168_3.a", "8000000L", 14336);
+        //NG
+        map_boardIndex_infor_[23] = Board("Arduino Nano (328)", "atmega168", "standard", "19200","NG168.a", "16000000L", 14336);
+        map_boardIndex_infor_[24] = Board("Arduino Nano (168)", "atmega8", "standard", "19200","NG8.a", "16000000L", 7168);
     }
 }
 
@@ -486,11 +502,11 @@ void UploadBase::writePro()
         QString mcu = map_boardIndex_infor_[boardIndex_].mcu;
         QString baudrate = map_boardIndex_infor_[boardIndex_].baudrate;
 #ifdef Q_OS_WIN32
-		QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, serialPort_, baudrate, hexPath_);
+        QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, serialPort_, baudrate, hexPath_);
 #elif defined(Q_OS_LINUX)
-		QString cmd = getUploadCommand("./Arduino/hardware/tools/avrdude", "./Arduino/hardware/tools/avrdude.conf", mcu, QString("/dev/") + serialPort_, baudrate, hexPath_);
+        QString cmd = getUploadCommand("./Arduino/hardware/tools/avrdude", "./Arduino/hardware/tools/avrdude.conf", mcu, QString("/dev/") + serialPort_, baudrate, hexPath_);
 #elif defined(Q_OS_MAC)
-		QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, QString("/dev/") + serialPort_, baudrate, hexPath_);
+        QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, QString("/dev/") + serialPort_, baudrate, hexPath_);
 #endif
 
         qDebug() << cmd;
