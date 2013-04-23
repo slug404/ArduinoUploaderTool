@@ -23,11 +23,12 @@ struct Board
 {
 	Board(){}
 
-	Board(const QString &name, const QString &mcu, const QString &type, const QString baud, int size)
+	Board(const QString &name, const QString &mcu, const QString &type, const QString &baud, const QString &staticLib, int size)
 		: fullName(name)
 		, mcu(mcu)
 		, mcuType(type)
 		, baudrate(baud)
+		, staticLibrary(staticLib)
 		, flashSIze(size)
 	{
 	}
@@ -36,6 +37,7 @@ struct Board
 	QString mcu;/**< mcu的名字 */
 	QString mcuType;/**< mcu的类型,主要针对leonardo的特殊处理 */
 	QString baudrate;/**< 波特率 */
+	QString staticLibrary;/**< 板子对应的预先编译好的静态库 */
 	int flashSIze;/**< flash的大小,用于可能要处理的超出大小的判断 */
 };
 
