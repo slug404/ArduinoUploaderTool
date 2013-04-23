@@ -23,10 +23,10 @@ struct Board
 {
     Board(){}
 
-    Board(const QString &name, const QString &mcu, const QString &type, const QString &baud, const QString &staticLib, const QString &frequency, int size)
+    Board(const QString &name, const QString &mcu, const QString &var, const QString &baud, const QString &staticLib, const QString &frequency, int size)
         : fullName(name)
         , mcu(mcu)
-        , mcuType(type)
+        , variant(var)
         , baudrate(baud)
         , staticLibrary(staticLib)
         , workingFrequency(frequency)
@@ -36,7 +36,7 @@ struct Board
 
     QString fullName;/**< 开发版的全名 */
     QString mcu;/**< mcu的名字 */
-    QString mcuType;/**< mcu的类型,主要针对leonardo的特殊处理 */
+    QString variant;/**< 可以通过这里做判断对leonardo的特殊处理 */
     QString baudrate;/**< 波特率 */
     QString staticLibrary;/**< 板子对应的预先编译好的静态库 */
     QString workingFrequency; /**< 工作频率 */
