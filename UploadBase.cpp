@@ -5,7 +5,8 @@
 #include <QDebug>
 #include <QRegExp>
 #include <QProcess>
-
+#include "Qextserialport/qextserialport.h"
+#include "Qextserialport/qextserialenumerator.h"
 /**
  * @brief 构造函数
  * @param [in] serial 串口号
@@ -521,17 +522,51 @@ void UploadBase::writePro()
     {
         QString mcu = map_boardIndex_infor_[boardIndex_].mcu;
         QString baudrate = map_boardIndex_infor_[boardIndex_].baudrate;
+        QString serialPort = serialPort_;
 
         if("leonardo" == map_boardIndex_infor_[boardIndex_].variant)
         {
+            QSet<QString> portsOld;
+            foreach (QextPortInfo portInfor, QextSerialEnumerator::getPorts())
+            {
+                portsOld << portInfor.portName;
+            }
 
+            PortSettings setting;
+            setting.BaudRate = BAUD1200;
+            setting.FlowControl = FLOW_OFF;
+            setting.DataBits = DATA_8;
+            setting.StopBits = STOP_2;
+            setting.Parity = PAR_NONE;
+
+            QextSerialPort *pScanSerialPort = new QextSerialPort(serialPort_, setting);
+
+            if(!pScanSerialPort->open(QIODevice::ReadWrite))
+            {
+                qDebug() << "serial prot open fail!";
+                qDebug() << pScanSerialPort->errorString();
+            }
+            pScanSerialPort->close();
+
+            QSet<QString> portsNew;
+            foreach (QextPortInfo portInfor, QextSerialEnumerator::getPorts())
+            {
+                portsNew << portInfor.portName;
+            }
+
+            QSet<QString> result = portsNew - portsOld;
+            if(!result.isEmpty())
+            {
+                serialPort = *(result.begin());
+            }
         }
+
 #ifdef Q_OS_WIN32
-        QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, serialPort_, baudrate, hexPath_);
+        QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, serialPort, baudrate, hexPath_);
 #elif defined(Q_OS_LINUX)
-        QString cmd = getUploadCommand("./Arduino/hardware/tools/avrdude", "./Arduino/hardware/tools/avrdude.conf", mcu, QString("/dev/") + serialPort_, baudrate, hexPath_);
+        QString cmd = getUploadCommand("./Arduino/hardware/tools/avrdude", "./Arduino/hardware/tools/avrdude.conf", mcu, QString("/dev/") + serialPort, baudrate, hexPath_);
 #elif defined(Q_OS_MAC)
-        QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, QString("/dev/") + serialPort_, baudrate, hexPath_);
+        QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, QString("/dev/") + serialPort, baudrate, hexPath_);
 #endif
 
         qDebug() << cmd;

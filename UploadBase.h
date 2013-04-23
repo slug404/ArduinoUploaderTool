@@ -92,6 +92,10 @@ public slots:
     void slotReadyReadStandardOutput();
     void slotreadyReadStandardError();
 
+    //
+    void slotTest1(bool b);
+    void slotTest2();
+
 protected:
     //fucntion
     explicit UploadBase(const QString &codePath, const QString &serial, int boardIndex, QObject *parent = 0);
