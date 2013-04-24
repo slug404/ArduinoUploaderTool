@@ -5,8 +5,10 @@
 #include <QDebug>
 #include <QRegExp>
 #include <QProcess>
+#include "Sleep.h"
 #include "Qextserialport/qextserialport.h"
 #include "Qextserialport/qextserialenumerator.h"
+
 /**
  * @brief 构造函数
  * @param [in] serial 串口号
@@ -31,37 +33,37 @@ UploadBase::UploadBase(const QString &codePath, const QString &serial, int board
 
     //init board information
     {
-        map_boardIndex_infor_[0] = Board("Arduino Uno", "atmega328p", "standard", "115200","Uno.a", "16000000L", 32256);
-        map_boardIndex_infor_[1] = Board("Arduino Duemilanove (328)", "atmega328p", "standard", "57600","Duemilanove328.a", "16000000L", 30720);
-        map_boardIndex_infor_[2] = Board("Arduino Duemilanove (168)", "atmega168", "standard", "19200","Duemilanove168.a", "16000000L", 14336);
-        map_boardIndex_infor_[3] = Board("Arduino Nano (328)", "atmega328p", "eightanaloginputs", "57600","Nano328.a", "16000000L", 30720);
-        map_boardIndex_infor_[4] = Board("Arduino Nano (168)", "atmega168", "eightanaloginputs", "19200","Nano168.a", "16000000L", 14336);
-        map_boardIndex_infor_[5] = Board("Arduino Mega 2560/ADK", "atmega2560", "mega", "115200", "Mega2560.a", "16000000L", 258048);
-        map_boardIndex_infor_[6] = Board("Arduino Mega 1280", "atmega1280", "mega", "57600", "Mega1280.a", "16000000L", 126976);
-        map_boardIndex_infor_[7] = Board("Arduino Leonardo", "atmega32u4", "leonardo", "57600","Leonardo.a", "16000000L", 28672);
-        map_boardIndex_infor_[8] = Board("Arduino Esplora", "atmega32u4", "leonardo", "57600","Esplora.a", "16000000L", 28672);
-        map_boardIndex_infor_[9] = Board("Arduino Micro", "atmega32u4", "micro", "57600","Micro.a", "16000000L", 28672);
-        map_boardIndex_infor_[10] = Board("Arduino Mini (328)", "atmega328p", "eightanaloginputs", "115200","Mini328.a", "16000000L", 28672);
-        map_boardIndex_infor_[11] = Board("Arduino Mini (168)", "atmega168", "eightanaloginputs", "19200","Mini168.a", "16000000L", 14336);
+        map_boardIndex_infor_[0] = Board("Arduino Uno", "atmega328p", "standard", "115200","Uno.a", "16000000L", "arduino", 32256);
+        map_boardIndex_infor_[1] = Board("Arduino Duemilanove (328)", "atmega328p", "standard", "57600","Duemilanove328.a", "16000000L", "arduino", 30720);
+        map_boardIndex_infor_[2] = Board("Arduino Duemilanove (168)", "atmega168", "standard", "19200","Duemilanove168.a", "16000000L", "arduino", 14336);
+        map_boardIndex_infor_[3] = Board("Arduino Nano (328)", "atmega328p", "eightanaloginputs", "57600","Nano328.a", "16000000L", "arduino", 30720);
+        map_boardIndex_infor_[4] = Board("Arduino Nano (168)", "atmega168", "eightanaloginputs", "19200","Nano168.a", "16000000L", "arduino", 14336);
+        map_boardIndex_infor_[5] = Board("Arduino Mega 2560/ADK", "atmega2560", "mega", "115200", "Mega2560.a", "16000000L", "wiring", 258048);
+        map_boardIndex_infor_[6] = Board("Arduino Mega 1280", "atmega1280", "mega", "57600", "Mega1280.a", "16000000L", "arduino", 126976);
+        map_boardIndex_infor_[7] = Board("Arduino Leonardo", "atmega32u4", "leonardo", "57600","Leonardo.a", "16000000L", "avr109", 28672);
+        map_boardIndex_infor_[8] = Board("Arduino Esplora", "atmega32u4", "leonardo", "57600","Esplora.a", "16000000L", "avr109", 28672);
+        map_boardIndex_infor_[9] = Board("Arduino Micro", "atmega32u4", "micro", "57600","Micro.a", "16000000L", "avr109", 28672);
+        map_boardIndex_infor_[10] = Board("Arduino Mini (328)", "atmega328p", "eightanaloginputs", "115200","Mini328.a", "16000000L", "arduino", 28672);
+        map_boardIndex_infor_[11] = Board("Arduino Mini (168)", "atmega168", "eightanaloginputs", "19200","Mini168.a", "16000000L", "arduino", 14336);
         //Ethernet
-        map_boardIndex_infor_[12] = Board("Arduino Ethernet", "atmega328p", "standard", "115200", "Ethernet.a", "16000000L", 32256);
+        map_boardIndex_infor_[12] = Board("Arduino Ethernet", "atmega328p", "standard", "115200", "Ethernet.a", "16000000L", "arduino", 32256);
         //Fio
-        map_boardIndex_infor_[13] = Board("Arduino Fio", "atmega328p", "eightanaloginputs", "57600","Fio.a", "8000000L", 30720);
+        map_boardIndex_infor_[13] = Board("Arduino Fio", "atmega328p", "eightanaloginputs", "57600","Fio.a", "8000000L", "arduino", 30720);
         //BT
-        map_boardIndex_infor_[14] = Board("Arduino BT (328)", "atmega328p", "eightanaloginputs", "19200","BT328.a", "16000000L", 28672);
-        map_boardIndex_infor_[15] = Board("Arduino Esplora", "atmega168", "eightanaloginputs", "19200","BT168.a", "16000000L", 14336);
+        map_boardIndex_infor_[14] = Board("Arduino BT (328)", "atmega328p", "eightanaloginputs", "19200","BT328.a", "16000000L", "arduino", 28672);
+        map_boardIndex_infor_[15] = Board("Arduino Esplora", "atmega168", "eightanaloginputs", "19200","BT168.a", "16000000L", "arduino", 14336);
         //LilyPad
-        map_boardIndex_infor_[16] = Board("LilyPad Arduino USB", "atmega32u4", "leonardo", "57600","LilyPadUsb.a", "8000000L", 28672);
-        map_boardIndex_infor_[17] = Board("LilyPad Arduino (328)", "atmega328p", "standard", "57600","LilyPad328.a", "8000000L", 30720);
-        map_boardIndex_infor_[18] = Board("LilyPad Arduino (168)", "atmega168", "standard", "19200","LilyPad168.a", "8000000L", 14336);
+        map_boardIndex_infor_[16] = Board("LilyPad Arduino USB", "atmega32u4", "leonardo", "57600","LilyPadUsb.a", "8000000L", "avr109", 28672);
+        map_boardIndex_infor_[17] = Board("LilyPad Arduino (328)", "atmega328p", "standard", "57600","LilyPad328.a", "8000000L", "arduino", 30720);
+        map_boardIndex_infor_[18] = Board("LilyPad Arduino (168)", "atmega168", "standard", "19200","LilyPad168.a", "8000000L", "arduino", 14336);
         //ProMini
-        map_boardIndex_infor_[19] = Board("Arduino Pro Mini (328) 5V", "atmega328p", "standard", "57600", "ProMini328_5.a", "16000000L", 30720);
-        map_boardIndex_infor_[20] = Board("Arduino Pro Mini (168) 5V", "atmega168", "standard", "19200", "ProMini168_5.a", "16000000L", 14336);
-        map_boardIndex_infor_[21] = Board("Arduino Pro Mini (328) 3.3V", "atmega328p", "standard", "57600", "ProMini328_3.a", "8000000L", 30720);
-        map_boardIndex_infor_[22] = Board("Arduino Pro Mini (168) 3.3V", "atmega168", "standard", "19200", "ProMini168_3.a", "8000000L", 14336);
+        map_boardIndex_infor_[19] = Board("Arduino Pro Mini (328) 5V", "atmega328p", "standard", "57600", "ProMini328_5.a", "16000000L", "arduino", 30720);
+        map_boardIndex_infor_[20] = Board("Arduino Pro Mini (168) 5V", "atmega168", "standard", "19200", "ProMini168_5.a", "16000000L", "arduino", 14336);
+        map_boardIndex_infor_[21] = Board("Arduino Pro Mini (328) 3.3V", "atmega328p", "standard", "57600", "ProMini328_3.a", "8000000L", "arduino", 30720);
+        map_boardIndex_infor_[22] = Board("Arduino Pro Mini (168) 3.3V", "atmega168", "standard", "19200", "ProMini168_3.a", "8000000L", "arduino", 14336);
         //NG
-        map_boardIndex_infor_[23] = Board("Arduino Nano (328)", "atmega168", "standard", "19200","NG168.a", "16000000L", 14336);
-        map_boardIndex_infor_[24] = Board("Arduino Nano (168)", "atmega8", "standard", "19200","NG8.a", "16000000L", 7168);
+        map_boardIndex_infor_[23] = Board("Arduino Nano (328)", "atmega168", "standard", "19200","NG168.a", "16000000L", "arduino", 14336);
+        map_boardIndex_infor_[24] = Board("Arduino Nano (168)", "atmega8", "standard", "19200","NG8.a", "16000000L", "arduino", 7168);
     }
 }
 
@@ -289,12 +291,14 @@ QString UploadBase::create_hex_fileCommand(const QString &toolPath, const QStrin
  * @param [in] serialPort 串口号
  * @param [in] baudrate 波特率
  * @param [in] hexPath 要上传的hex文件路径
+ * @param [in] protocol arduino(一般arduino类型),  avr109(leonardo), wiring(mega2560 编程器)
  * @return 扔给avrdude的命令
  */
 QString UploadBase::getUploadCommand(const QString &avrdudePath, const QString &configPath,
-                                     const QString &cpuType, const QString &serialPort, const QString &baudrate, const QString &hexPath)
+                                     const QString &cpuType, const QString &serialPort, const QString &baudrate,
+                                     const QString &hexPath, const QString &protocol)
 {
-    QString cmd = QString("%1 -C%2 -v -v -v -v -p%3 -carduino -P%4 -b%5 -D -Uflash:w:%6:i").arg(avrdudePath).arg(configPath).arg(cpuType).arg(serialPort).arg(baudrate).arg(hexPath);
+    QString cmd = QString("%1 -C%2 -v -v -v -v -p%3 -c%7 -P%4 -b%5 -D -Uflash:w:%6:i").arg(avrdudePath).arg(configPath).arg(cpuType).arg(serialPort).arg(baudrate).arg(hexPath).arg(protocol);
 
     return cmd;
 }
@@ -523,6 +527,7 @@ void UploadBase::writePro()
         QString mcu = map_boardIndex_infor_[boardIndex_].mcu;
         QString baudrate = map_boardIndex_infor_[boardIndex_].baudrate;
         QString serialPort = serialPort_;
+        QString protocol = map_boardIndex_infor_[boardIndex_].protocol;
 
         if("leonardo" == map_boardIndex_infor_[boardIndex_].variant)
         {
@@ -539,30 +544,49 @@ void UploadBase::writePro()
             setting.StopBits = STOP_2;
             setting.Parity = PAR_NONE;
 
-            QextSerialPort *pScanSerialPort = new QextSerialPort(serialPort_, setting);
+            QextSerialPort *pScanSerialPort = new QextSerialPort(serialPort_, setting, QextSerialPort::Polling);
+            //connect(pScanSerialPort, SIGNAL(aboutToClose()), this, SLOT(slotTest2()));
+            //            connect(pScanSerialPort, SIGNAL(dsrChanged(bool)), this, SLOT(slotTest1(bool)));
+            //            connect(pScanSerialPort, SIGNAL(signalPortClose()), this, SLOT(slotTest2()));
 
             if(!pScanSerialPort->open(QIODevice::ReadWrite))
             {
                 qDebug() << "serial prot open fail!";
                 qDebug() << pScanSerialPort->errorString();
             }
+            Sleep::sleep(100);
             pScanSerialPort->close();
 
             QSet<QString> portsNew;
-            foreach (QextPortInfo portInfor, QextSerialEnumerator::getPorts())
+            do
             {
-                portsNew << portInfor.portName;
-            }
+                QList<QextPortInfo> tmp = QextSerialEnumerator::getPorts();
+                foreach (QextPortInfo portInfor, tmp)
+                {
+                    portsNew << portInfor.portName;
+                }
+            }while (portsNew.size() <= portsOld.size());
+
+//            {
+//                Sleep::sleep(6000);
+//                foreach (QextPortInfo portInfor, QextSerialEnumerator::getPorts())
+//                {
+//                    portsNew << portInfor.portName;
+//                }
+//            }
 
             QSet<QString> result = portsNew - portsOld;
             if(!result.isEmpty())
             {
                 serialPort = *(result.begin());
             }
+
         }
 
 #ifdef Q_OS_WIN32
-        QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, serialPort, baudrate, hexPath_);
+        QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, serialPort, baudrate, hexPath_, protocol);
+        //.\Arduino\hardware\tools\avr\bin\avrdude -C.\Arduino\hardware\tools\avr\etc\avrdude.conf -v -v -v -v -patmega32u4 -cavr109 -PCOM24 -b57600 -D -Uflash:w:.\Temp\imu.cpp.hex:i
+        //QString cmd = "./Arduino/hardware/tools/avr/bin/avrdude -C./Arduino/hardware/tools/avr/etc/avrdude.conf -v -v -v -v -patmega32u4 -cavr109 -PCOM24 -b57600 -D -Uflash:w:./Temp/imu.cpp.hex:i";
 #elif defined(Q_OS_LINUX)
         QString cmd = getUploadCommand("./Arduino/hardware/tools/avrdude", "./Arduino/hardware/tools/avrdude.conf", mcu, QString("/dev/") + serialPort, baudrate, hexPath_);
 #elif defined(Q_OS_MAC)
@@ -780,4 +804,17 @@ void UploadBase::slotReadyReadStandardOutput()
 void UploadBase::slotreadyReadStandardError()
 {
     readStandardError();
+}
+
+void UploadBase::slotTest1(bool b)
+{
+    qDebug() << "111111111111111111111";
+}
+
+void UploadBase::slotTest2()
+{
+    qDebug() << "222222222222222222222";
+    Sleep::sleep(300);
+    QList<QextPortInfo> tmp = QextSerialEnumerator::getPorts();
+    qDebug() << tmp.front().portName;
 }

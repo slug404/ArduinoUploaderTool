@@ -23,13 +23,14 @@ struct Board
 {
     Board(){}
 
-    Board(const QString &name, const QString &mcu, const QString &var, const QString &baud, const QString &staticLib, const QString &frequency, int size)
+    Board(const QString &name, const QString &mcu, const QString &var, const QString &baud, const QString &staticLib, const QString &frequency, const QString &pro, int size)
         : fullName(name)
         , mcu(mcu)
         , variant(var)
         , baudrate(baud)
         , staticLibrary(staticLib)
         , workingFrequency(frequency)
+        , protocol(pro)
         , maxAvailableSIze(size)
     {
     }
@@ -40,6 +41,7 @@ struct Board
     QString baudrate;/**< 波特率 */
     QString staticLibrary;/**< 板子对应的预先编译好的静态库 */
     QString workingFrequency; /**< 工作频率 */
+    QString protocol; /**< 编程器类型arduino, avr109(atmega32u4), wiring(atmega2560) */
     int maxAvailableSIze;/**< flash的最大可用大小,用于可能要处理的超出大小的判断 */
 };
 
@@ -91,8 +93,6 @@ signals:
 public slots:
     void slotReadyReadStandardOutput();
     void slotreadyReadStandardError();
-
-    //
     void slotTest1(bool b);
     void slotTest2();
 
@@ -123,7 +123,7 @@ protected:
     QString create_hex_fileCommand(const QString &toolPath, const QString &elfPath, const QString &hexPath);
 
     //上传
-    QString getUploadCommand(const QString &avrdudePath, const QString &configPath, const QString &cpuType, const QString &serialPort, const QString &baudrate, const QString &hexPath);
+    QString getUploadCommand(const QString &avrdudePath, const QString &configPath, const QString &cpuType, const QString &serialPort, const QString &baudrate, const QString &hexPath, const QString &protocol);
     QSet<QString> getAllChildDirPath(const QString &parentDirPath);
 
     //复制库相关,为了防止有同名文件导致的覆盖问题.目前暂时不使用
