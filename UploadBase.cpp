@@ -247,7 +247,7 @@ QString UploadBase::create_elf_fileCommand(const QString &filePath, const QStrin
             cmd += workPath+"/" + fileName + " ";
         }
     }
-    //cmd += staticLibraryPath + " -LC:" + workPath + " -lm";
+
     cmd += staticLibraryPath + " -L" + workPath + " -lm";
 
     return cmd;
@@ -511,7 +511,9 @@ void UploadBase::compile()
             compileLibrary(dirPath, mcu, var, frequency);
         }
 
-        linkerCommand(codePath_, mcu, "./Temp/core.a");
+        QString staticLibrary = map_boardIndex_infor_[boardIndex_].staticLibrary;
+        QString staticLibPath = QString("./Arduino/staticLibrary/%1").arg(staticLibrary);
+        linkerCommand(codePath_, mcu, staticLibPath);
     }
     else
     {
@@ -593,7 +595,7 @@ void UploadBase::writePro()
         QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, QString("/dev/") + serialPort, baudrate, hexPath_);
 #endif
 
-        qDebug() << cmd;
+        qDebug() << "uploader: " << endl << cmd;
         pExternalProcess_->execute(cmd);
     }
     else
