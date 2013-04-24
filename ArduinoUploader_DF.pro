@@ -21,11 +21,13 @@ SOURCES += main.cpp \
 	UploadBase.cpp \
 	Uploader_Mac.cpp \
 	Uploader_Linux.cpp \
-	Uploader_Windows.cpp
+	Uploader_Windows.cpp \
+    Sleep.cpp
 
 HEADERS += \
 	UploadFactory.h \
 	UploadBase.h \
 	Uploader_Mac.h \
 	Uploader_Linux.h \
-	Uploader_Windows.h
+	Uploader_Windows.h \
+    Sleep.h
