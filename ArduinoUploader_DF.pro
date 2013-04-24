@@ -10,7 +10,7 @@ QT       -= gui
 greaterThan(QT_MAJOR_VERSION, 4): QMAKE_CXXFLAGS += -std=c++0x
 equals(QT_MAJOR_VERSION, 5): CONFIG += c++11
 
-TARGET = ArduinoUploader_DF
+TARGET = DFRobotUploader
 TEMPLATE = app
 
 INCLUDEPATH += ./QExtserialport
@@ -22,7 +22,7 @@ SOURCES += main.cpp \
 	Uploader_Mac.cpp \
 	Uploader_Linux.cpp \
 	Uploader_Windows.cpp \
-    Sleep.cpp
+	Sleep.cpp
 
 HEADERS += \
 	UploadFactory.h \
@@ -30,4 +30,4 @@ HEADERS += \
 	Uploader_Mac.h \
 	Uploader_Linux.h \
 	Uploader_Windows.h \
-    Sleep.h
+	Sleep.h

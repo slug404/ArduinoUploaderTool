@@ -5,16 +5,16 @@
 #include <QDebug>
 #include <QRegExp>
 #include <QProcess>
+
 #include "Sleep.h"
 #include "Qextserialport/qextserialport.h"
 #include "Qextserialport/qextserialenumerator.h"
 
 /**
  * @brief 构造函数
+ * @param [in] codePath 编译目录
  * @param [in] serial 串口号
  * @param [in] board 开发版型号
- * @param [in] sketch ?
- * @param [in] debug debug模式?
  * @param [in] parent
  */
 UploadBase::UploadBase(const QString &codePath, const QString &serial, int boardIndex, QObject *parent)
@@ -27,6 +27,9 @@ UploadBase::UploadBase(const QString &codePath, const QString &serial, int board
     , cmd_("")
     , hexPath_("")
 {
+    scanAllLibraryHeaderFile("./Arduino/libraries");
+    scanAllheaderFile("./Arduino/libraries");
+
     pExternalProcess_ = new QProcess(this);
     connect(pExternalProcess_, SIGNAL(readyReadStandardError()), this, SLOT(slotreadyReadStandardError()));
     connect(pExternalProcess_, SIGNAL(readyReadStandardOutput()), this, SLOT(slotReadyReadStandardOutput()));
@@ -51,7 +54,7 @@ UploadBase::UploadBase(const QString &codePath, const QString &serial, int board
         map_boardIndex_infor_[13] = Board("Arduino Fio", "atmega328p", "eightanaloginputs", "57600","Fio.a", "8000000L", "arduino", 30720);
         //BT
         map_boardIndex_infor_[14] = Board("Arduino BT (328)", "atmega328p", "eightanaloginputs", "19200","BT328.a", "16000000L", "arduino", 28672);
-        map_boardIndex_infor_[15] = Board("Arduino Esplora", "atmega168", "eightanaloginputs", "19200","BT168.a", "16000000L", "arduino", 14336);
+        map_boardIndex_infor_[15] = Board("Arduino Bt (168)", "atmega168", "eightanaloginputs", "19200","BT168.a", "16000000L", "arduino", 14336);
         //LilyPad
         map_boardIndex_infor_[16] = Board("LilyPad Arduino USB", "atmega32u4", "leonardo", "57600","LilyPadUsb.a", "8000000L", "avr109", 28672);
         map_boardIndex_infor_[17] = Board("LilyPad Arduino (328)", "atmega328p", "standard", "57600","LilyPad328.a", "8000000L", "arduino", 30720);
@@ -76,7 +79,6 @@ void UploadBase::start()
     prepare();//prepare to compile
     compile();//compileLibrary, linkerCommand
     writePro();//getUploadCommand, and call QProcess to execute
-    clear();
 }
 
 /**
@@ -155,7 +157,8 @@ QString UploadBase::getCompilerCommand(const QString &sketchPath, const QString 
         cmd = QString("%1/avr-gcc -c -g -Os -Wall -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3 -MMD %4 -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency).arg(id);
     }
     else if("cpp" == suffix
-            || "CPP" == suffix)
+            || "CPP" == suffix
+            || "java.exe" == infor.fileName())
     {
         cmd = QString("%1/avr-g++ -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3 -MMD %4 -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency).arg(id);
     }
@@ -179,11 +182,13 @@ QString UploadBase::getCompilerCommand(const QString &sketchPath, const QString 
         cmd += QString("-I") + QFileInfo(sketchPath).path() + " ";
     }
     cmd += QString(sketchPath + " -o "  +workPath + "/" + infor.fileName() + ".o");
+#ifdef QDEBUG_H
     QFile file("cmd.txt");
     if(!file.open(QFile::Append))
     {
         qDebug() << "cmd.txt can't open!!";
     }
+#endif
     file.write(cmd.toAscii());
     file.write("\n");
     file.close();
@@ -547,16 +552,13 @@ void UploadBase::writePro()
             setting.Parity = PAR_NONE;
 
             QextSerialPort *pScanSerialPort = new QextSerialPort(serialPort_, setting, QextSerialPort::Polling);
-            //connect(pScanSerialPort, SIGNAL(aboutToClose()), this, SLOT(slotTest2()));
-            //            connect(pScanSerialPort, SIGNAL(dsrChanged(bool)), this, SLOT(slotTest1(bool)));
-            //            connect(pScanSerialPort, SIGNAL(signalPortClose()), this, SLOT(slotTest2()));
 
             if(!pScanSerialPort->open(QIODevice::ReadWrite))
             {
                 qDebug() << "serial prot open fail!";
                 qDebug() << pScanSerialPort->errorString();
             }
-            Sleep::sleep(100);
+            //Sleep::sleep(100);
             pScanSerialPort->close();
 
             QSet<QString> portsNew;
@@ -569,26 +571,15 @@ void UploadBase::writePro()
                 }
             }while (portsNew.size() <= portsOld.size());
 
-//            {
-//                Sleep::sleep(6000);
-//                foreach (QextPortInfo portInfor, QextSerialEnumerator::getPorts())
-//                {
-//                    portsNew << portInfor.portName;
-//                }
-//            }
-
             QSet<QString> result = portsNew - portsOld;
             if(!result.isEmpty())
             {
                 serialPort = *(result.begin());
             }
-
         }
 
 #ifdef Q_OS_WIN32
         QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, serialPort, baudrate, hexPath_, protocol);
-        //.\Arduino\hardware\tools\avr\bin\avrdude -C.\Arduino\hardware\tools\avr\etc\avrdude.conf -v -v -v -v -patmega32u4 -cavr109 -PCOM24 -b57600 -D -Uflash:w:.\Temp\imu.cpp.hex:i
-        //QString cmd = "./Arduino/hardware/tools/avr/bin/avrdude -C./Arduino/hardware/tools/avr/etc/avrdude.conf -v -v -v -v -patmega32u4 -cavr109 -PCOM24 -b57600 -D -Uflash:w:./Temp/imu.cpp.hex:i";
 #elif defined(Q_OS_LINUX)
         QString cmd = getUploadCommand("./Arduino/hardware/tools/avrdude", "./Arduino/hardware/tools/avrdude.conf", mcu, QString("/dev/") + serialPort, baudrate, hexPath_);
 #elif defined(Q_OS_MAC)
@@ -602,6 +593,15 @@ void UploadBase::writePro()
     {
         qDebug() << "uploader error!";
     }
+
+}
+
+void UploadBase::readStandardOutput()
+{
+}
+
+void UploadBase::readStandardError()
+{
 }
 
 /**
@@ -806,17 +806,4 @@ void UploadBase::slotReadyReadStandardOutput()
 void UploadBase::slotreadyReadStandardError()
 {
     readStandardError();
-}
-
-void UploadBase::slotTest1(bool b)
-{
-    qDebug() << "111111111111111111111";
-}
-
-void UploadBase::slotTest2()
-{
-    qDebug() << "222222222222222222222";
-    Sleep::sleep(300);
-    QList<QextPortInfo> tmp = QextSerialEnumerator::getPorts();
-    qDebug() << tmp.front().portName;
 }

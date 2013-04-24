@@ -93,8 +93,6 @@ signals:
 public slots:
     void slotReadyReadStandardOutput();
     void slotreadyReadStandardError();
-    void slotTest1(bool b);
-    void slotTest2();
 
 protected:
     //fucntion
@@ -133,12 +131,12 @@ protected:
     Q_DISABLE_COPY(UploadBase)
 
     //interface
-    virtual void prepare(); //! 准备
-    virtual void compile(); //! 编译
-    virtual void writePro();//! 烧写
-    virtual void clear() = 0; //! 清理
-    virtual void readStandardOutput() = 0;
-    virtual void readStandardError() = 0;
+    void prepare(); //! 准备
+    void compile(); //! 编译
+    void writePro();//! 烧写
+
+    void readStandardOutput();
+    void readStandardError();
 
 protected:
     //data
