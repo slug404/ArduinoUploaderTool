@@ -55,7 +55,7 @@ UploadBase::UploadBase(const QString &codePath, const QString &serial, int board
         map_boardIndex_infor_[13] = Board("Arduino Fio", "atmega328p", "eightanaloginputs", "57600","Fio.a", "8000000L", "arduino", 30720);
         //BT
         map_boardIndex_infor_[14] = Board("Arduino BT (328)", "atmega328p", "eightanaloginputs", "19200","BT328.a", "16000000L", "arduino", 28672);
-        map_boardIndex_infor_[15] = Board("Arduino Bt (168)", "atmega168", "eightanaloginputs", "19200","BT168.a", "16000000L", "arduino", 14336);
+        map_boardIndex_infor_[15] = Board("Arduino BT (168)", "atmega168", "eightanaloginputs", "19200","BT168.a", "16000000L", "arduino", 14336);
         //LilyPad
         map_boardIndex_infor_[16] = Board("LilyPad Arduino USB", "atmega32u4", "leonardo", "57600","LilyPadUsb.a", "8000000L", "avr109", 28672);
         map_boardIndex_infor_[17] = Board("LilyPad Arduino (328)", "atmega328p", "standard", "57600","LilyPad328.a", "8000000L", "arduino", 30720);
@@ -66,8 +66,8 @@ UploadBase::UploadBase(const QString &codePath, const QString &serial, int board
         map_boardIndex_infor_[21] = Board("Arduino Pro Mini (328) 3.3V", "atmega328p", "standard", "57600", "ProMini328_3.a", "8000000L", "arduino", 30720);
         map_boardIndex_infor_[22] = Board("Arduino Pro Mini (168) 3.3V", "atmega168", "standard", "19200", "ProMini168_3.a", "8000000L", "arduino", 14336);
         //NG
-        map_boardIndex_infor_[23] = Board("Arduino Nano (328)", "atmega168", "standard", "19200","NG168.a", "16000000L", "arduino", 14336);
-        map_boardIndex_infor_[24] = Board("Arduino Nano (168)", "atmega8", "standard", "19200","NG8.a", "16000000L", "arduino", 7168);
+        map_boardIndex_infor_[23] = Board("Arduino NG (168)", "atmega168", "standard", "19200","NG168.a", "16000000L", "arduino", 14336);
+        map_boardIndex_infor_[24] = Board("Arduino NG", "atmega8", "standard", "19200","NG8.a", "16000000L", "arduino", 7168);
     }
 }
 
