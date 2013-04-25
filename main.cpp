@@ -42,5 +42,5 @@ int main(int argc, char *argv[])
         qDebug() << "error";
     }
 
-    return a.exec();
+    //return a.exec();
 }

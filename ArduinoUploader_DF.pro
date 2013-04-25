@@ -10,7 +10,7 @@ QT       -= gui
 greaterThan(QT_MAJOR_VERSION, 4): QMAKE_CXXFLAGS += -std=c++0x
 equals(QT_MAJOR_VERSION, 5): CONFIG += c++11
 
-TARGET = DFRobotUploader
+TARGET = ArduinoUploader
 TEMPLATE = app
 
 INCLUDEPATH += ./QExtserialport

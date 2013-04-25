@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QRegExp>
 #include <QProcess>
+#include <QCoreApplication>
 
 #include "Sleep.h"
 #include "Qextserialport/qextserialport.h"
@@ -587,6 +588,7 @@ void UploadBase::writePro()
 #endif
 
         qDebug() << "uploader: " << endl << cmd;
+        //connect(pExternalProcess_, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(deleteLater()));
         pExternalProcess_->execute(cmd);
     }
     else
@@ -594,6 +596,7 @@ void UploadBase::writePro()
         qDebug() << "uploader error!";
     }
 
+    //QCoreApplication::exit(4);
 }
 
 void UploadBase::readStandardOutput()
