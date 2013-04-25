@@ -5,6 +5,8 @@
 #include <QSet>
 #include <QMap>
 #include <QProcess>
+#include <iostream>
+using namespace std;
 
 /**
  * @brief 库引用信息
@@ -135,8 +137,7 @@ protected:
     void compile(); //! 编译
     void writePro();//! 烧写
 
-    void readStandardOutput();
-    void readStandardError();
+
 
 protected:
     //data
