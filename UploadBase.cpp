@@ -215,9 +215,9 @@ void UploadBase::linkerCommand(const QString &filePath, const QString &cpuType, 
     QString eep = create_eep_fileCommand("./Arduino/hardware/tools/avr/bin/avr-objcopy", elfPath, eepPath);
     QString hex = create_hex_fileCommand("./Arduino/hardware/tools/avr/bin/avr-objcopy",elfPath, hexPath);
 
-    qDebug() << "elf: " << elf;
-    qDebug() << "eep: " << eep;
-    qDebug() << "hex: " << hex;
+//    qDebug() << "elf: " << elf;
+//    qDebug() << "eep: " << eep;
+//    qDebug() << "hex: " << hex;
 
     //调用QProcess
     if(pExternalProcess_)
@@ -225,6 +225,11 @@ void UploadBase::linkerCommand(const QString &filePath, const QString &cpuType, 
         pExternalProcess_->execute(elf);//生成elf文件
         pExternalProcess_->execute(eep);//生成eep文件
         pExternalProcess_->execute(hex);//生成hex文件
+
+        if(QFile::exists(hexPath))
+        {
+            cout << "Compiliation successful completed!" << endl;
+        }
     }
 }
 
@@ -356,13 +361,13 @@ void UploadBase::compileLibrary(const QString &libraryDirPath, const QString &mc
             }
             else
             {//
-                qDebug() << "ni mei de!!!!!!!!!!";
+                //qDebug() << "can't find this header file " << headerFile;
             }
         }
 
         //编译本文件
         QString cmd = getCompilerCommand(filePath, mcu, var, libPaths.toList());
-        qDebug() << cmd;
+        //qDebug() << cmd;
         pExternalProcess_->execute(cmd);
         alreadyCompile_.clear();
     }
@@ -510,8 +515,10 @@ void UploadBase::compile()
         QString var = map_boardIndex_infor_[boardIndex_].variant;
         QString frequency = map_boardIndex_infor_[boardIndex_].workingFrequency;
         QString cmd = getCompilerCommand(codePath_, mcu, var, libraryPaths_.toList(), frequency);
-        qDebug() << cmd;
-        pExternalProcess_->execute(cmd);
+        //qDebug() << cmd;
+        //pExternalProcess_->execute(cmd);
+        pExternalProcess_->start(cmd);
+        pExternalProcess_->waitForFinished();
         foreach (const QString &dirPath, libraryPaths_)
         {
             compileLibrary(dirPath, mcu, var, frequency);
@@ -559,7 +566,7 @@ void UploadBase::writePro()
                 qDebug() << "serial prot open fail!";
                 qDebug() << pScanSerialPort->errorString();
             }
-            //Sleep::sleep(100);
+
             pScanSerialPort->close();
 
             QSet<QString> portsNew;
@@ -586,25 +593,19 @@ void UploadBase::writePro()
 #elif defined(Q_OS_MAC)
         QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, QString("/dev/") + serialPort, baudrate, hexPath_);
 #endif
-
-        qDebug() << "uploader: " << endl << cmd;
-        //connect(pExternalProcess_, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(deleteLater()));
-        pExternalProcess_->execute(cmd);
+        qDebug() << cmd;
+//        pExternalProcess_->execute(cmd);
+        if(!QFile::exists(hexPath_))
+        {
+            return;
+        }
+        pExternalProcess_->start(cmd);
+        pExternalProcess_->waitForFinished(30000);
     }
     else
     {
         qDebug() << "uploader error!";
     }
-
-    //QCoreApplication::exit(4);
-}
-
-void UploadBase::readStandardOutput()
-{
-}
-
-void UploadBase::readStandardError()
-{
 }
 
 /**
@@ -628,7 +629,20 @@ QSet<QString> UploadBase::getAllReferenceHeaderFileSet(const QString &filePath)
         }
         else if(QFileInfo(filePath).baseName() == QFileInfo(fileName).baseName())
         {//处理当前目录 因为.cpp与.h都会包含其他library
-            QString tmpPath =filePath.left(filePath.indexOf(".")) + ".h";
+            //QString tmpPath =filePath.left(filePath.indexOf(".")) + ".h";
+            QString tmpPath;
+            if(filePath.contains(".cpp", Qt::CaseInsensitive))
+            {
+                tmpPath = QString(filePath).replace(QString(".cpp"), QString(".h"));
+            }
+            else if(filePath.contains(".c", Qt::CaseInsensitive))
+            {
+                tmpPath = QString(filePath).replace(QString(".c"), QString(".h"));
+            }
+            else
+            {
+                qDebug() << "can't find !!!!!!!!!!!";
+            }
             if(!alreadyCompile_.contains(tmpPath))
             {
                 alreadyCompile_ << tmpPath;
@@ -681,12 +695,7 @@ QSet<QString> UploadBase::getAllReferenceHeaderFileSet(const QString &filePath)
 QSet<QString> UploadBase::getReferenceHeaderFilesFromSingleFile(const QString &filePath)
 {
     QFile file(filePath);
-    {
-        if(QFileInfo(filePath).baseName() == "twi.c")
-        {
-            qDebug() << "twi.c";
-        }
-    }
+
     if(!file.open(QFile::ReadOnly))
     {
         qDebug() << "getHeaderFiles file can't open " << filePath;
@@ -803,10 +812,17 @@ void UploadBase::scanAllheaderFile(const QString &path)
 
 void UploadBase::slotReadyReadStandardOutput()
 {
-    readStandardOutput();
+    cout << "+++++++++++++++begin std out put++++++++++++++++++\n";
+    QString stdOutPut = pExternalProcess_->readAllStandardOutput();
+    cout << stdOutPut.toAscii().data() << endl;
+    cout << "+++++++++++++++end std out put+++++++++++++++++++\n";
 }
 
 void UploadBase::slotreadyReadStandardError()
 {
-    readStandardError();
+    cerr << "+++++++++++++++begin std error ++++++++++++++++++\n";
+    QString errorString = pExternalProcess_->readAllStandardError();
+
+    cerr << errorString.toAscii().data() << endl;
+    cerr << "+++++++++++++++end std error+++++++++++++++++++\n";
 }

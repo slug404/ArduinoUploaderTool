@@ -4,10 +4,13 @@
 #include <QFile>
 #include <QMap>
 #include <QSharedPointer>
+#include <iostream>
 #include "Uploader_Windows.h"
 #include "Uploader_Linux.h"
 #include "Uploader_Mac.h"
 #include "UploadFactory.h"
+
+using namespace std;
 
 /*! the parameter number pass by command line*/
 const int PARAMER_COUNT = 1+3;
@@ -15,6 +18,7 @@ const int PARAMER_COUNT = 1+3;
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+
 #ifdef QDEBUG_H
     if(QFile::exists("cmd.txt"))
     {
@@ -39,8 +43,8 @@ int main(int argc, char *argv[])
     }
     else
     {
-        qDebug() << "error";
+        cerr << "paramer conut error" << endl;
     }
 
-    //return a.exec();
+    return 0;
 }
