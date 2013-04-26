@@ -19,56 +19,56 @@
  * @param [in] parent
  */
 UploadBase::UploadBase(const QString &codePath, const QString &serial, int boardIndex, QObject *parent)
-    : QObject(parent)
-    , pExternalProcess_(NULL)
-    , serialPort_(serial)
-    , boardIndex_(boardIndex)
-    , compilerPath_("")
-    , codePath_(codePath)
-    , cmd_("")
-    , hexPath_("")
+	: QObject(parent)
+	, pExternalProcess_(NULL)
+	, serialPort_(serial)
+	, boardIndex_(boardIndex)
+	, compilerPath_("")
+	, codePath_(codePath)
+	, cmd_("")
+	, hexPath_("")
 {
-    scanAllLibraryHeaderFile("./Arduino/libraries");
-    scanAllheaderFile("./Arduino/libraries");
+	scanAllLibraryHeaderFile("./Arduino/libraries");
+	scanAllheaderFile("./Arduino/libraries");
 
-    pExternalProcess_ = new QProcess(this);
-    connect(pExternalProcess_, SIGNAL(readyReadStandardError()), this, SLOT(slotreadyReadStandardError()));
-    connect(pExternalProcess_, SIGNAL(readyReadStandardOutput()), this, SLOT(slotReadyReadStandardOutput()));
+	pExternalProcess_ = new QProcess(this);
+	connect(pExternalProcess_, SIGNAL(readyReadStandardError()), this, SLOT(slotreadyReadStandardError()));
+	connect(pExternalProcess_, SIGNAL(readyReadStandardOutput()), this, SLOT(slotReadyReadStandardOutput()));
 
-    //init board information
-    {
-        map_boardIndex_infor_[0] = Board("Arduino Uno", "atmega328p", "standard", "115200","Uno.a", "16000000L", "arduino", 32256);
-        map_boardIndex_infor_[1] = Board("Arduino Duemilanove (328)", "atmega328p", "standard", "57600","Duemilanove328.a", "16000000L", "arduino", 30720);
-        map_boardIndex_infor_[2] = Board("Arduino Duemilanove (168)", "atmega168", "standard", "19200","Duemilanove168.a", "16000000L", "arduino", 14336);
-        map_boardIndex_infor_[3] = Board("Arduino Nano (328)", "atmega328p", "eightanaloginputs", "57600","Nano328.a", "16000000L", "arduino", 30720);
-        map_boardIndex_infor_[4] = Board("Arduino Nano (168)", "atmega168", "eightanaloginputs", "19200","Nano168.a", "16000000L", "arduino", 14336);
-        map_boardIndex_infor_[5] = Board("Arduino Mega 2560/ADK", "atmega2560", "mega", "115200", "Mega2560.a", "16000000L", "wiring", 258048);
-        map_boardIndex_infor_[6] = Board("Arduino Mega 1280", "atmega1280", "mega", "57600", "Mega1280.a", "16000000L", "arduino", 126976);
-        map_boardIndex_infor_[7] = Board("Arduino Leonardo", "atmega32u4", "leonardo", "57600","Leonardo.a", "16000000L", "avr109", 28672);
-        map_boardIndex_infor_[8] = Board("Arduino Esplora", "atmega32u4", "leonardo", "57600","Esplora.a", "16000000L", "avr109", 28672);
-        map_boardIndex_infor_[9] = Board("Arduino Micro", "atmega32u4", "micro", "57600","Micro.a", "16000000L", "avr109", 28672);
-        map_boardIndex_infor_[10] = Board("Arduino Mini (328)", "atmega328p", "eightanaloginputs", "115200","Mini328.a", "16000000L", "arduino", 28672);
-        map_boardIndex_infor_[11] = Board("Arduino Mini (168)", "atmega168", "eightanaloginputs", "19200","Mini168.a", "16000000L", "arduino", 14336);
-        //Ethernet
-        map_boardIndex_infor_[12] = Board("Arduino Ethernet", "atmega328p", "standard", "115200", "Ethernet.a", "16000000L", "arduino", 32256);
-        //Fio
-        map_boardIndex_infor_[13] = Board("Arduino Fio", "atmega328p", "eightanaloginputs", "57600","Fio.a", "8000000L", "arduino", 30720);
-        //BT
-        map_boardIndex_infor_[14] = Board("Arduino BT (328)", "atmega328p", "eightanaloginputs", "19200","BT328.a", "16000000L", "arduino", 28672);
-        map_boardIndex_infor_[15] = Board("Arduino BT (168)", "atmega168", "eightanaloginputs", "19200","BT168.a", "16000000L", "arduino", 14336);
-        //LilyPad
-        map_boardIndex_infor_[16] = Board("LilyPad Arduino USB", "atmega32u4", "leonardo", "57600","LilyPadUsb.a", "8000000L", "avr109", 28672);
-        map_boardIndex_infor_[17] = Board("LilyPad Arduino (328)", "atmega328p", "standard", "57600","LilyPad328.a", "8000000L", "arduino", 30720);
-        map_boardIndex_infor_[18] = Board("LilyPad Arduino (168)", "atmega168", "standard", "19200","LilyPad168.a", "8000000L", "arduino", 14336);
-        //ProMini
-        map_boardIndex_infor_[19] = Board("Arduino Pro Mini (328) 5V", "atmega328p", "standard", "57600", "ProMini328_5.a", "16000000L", "arduino", 30720);
-        map_boardIndex_infor_[20] = Board("Arduino Pro Mini (168) 5V", "atmega168", "standard", "19200", "ProMini168_5.a", "16000000L", "arduino", 14336);
-        map_boardIndex_infor_[21] = Board("Arduino Pro Mini (328) 3.3V", "atmega328p", "standard", "57600", "ProMini328_3.a", "8000000L", "arduino", 30720);
-        map_boardIndex_infor_[22] = Board("Arduino Pro Mini (168) 3.3V", "atmega168", "standard", "19200", "ProMini168_3.a", "8000000L", "arduino", 14336);
-        //NG
-        map_boardIndex_infor_[23] = Board("Arduino NG (168)", "atmega168", "standard", "19200","NG168.a", "16000000L", "arduino", 14336);
-        map_boardIndex_infor_[24] = Board("Arduino NG", "atmega8", "standard", "19200","NG8.a", "16000000L", "arduino", 7168);
-    }
+	//init board information
+	{
+		map_boardIndex_infor_[0] = Board("Arduino Uno", "atmega328p", "standard", "115200","Uno.a", "16000000L", "arduino", 32256);
+		map_boardIndex_infor_[1] = Board("Arduino Duemilanove (328)", "atmega328p", "standard", "57600","Duemilanove328.a", "16000000L", "arduino", 30720);
+		map_boardIndex_infor_[2] = Board("Arduino Duemilanove (168)", "atmega168", "standard", "19200","Duemilanove168.a", "16000000L", "arduino", 14336);
+		map_boardIndex_infor_[3] = Board("Arduino Nano (328)", "atmega328p", "eightanaloginputs", "57600","Nano328.a", "16000000L", "arduino", 30720);
+		map_boardIndex_infor_[4] = Board("Arduino Nano (168)", "atmega168", "eightanaloginputs", "19200","Nano168.a", "16000000L", "arduino", 14336);
+		map_boardIndex_infor_[5] = Board("Arduino Mega 2560/ADK", "atmega2560", "mega", "115200", "Mega2560.a", "16000000L", "wiring", 258048);
+		map_boardIndex_infor_[6] = Board("Arduino Mega 1280", "atmega1280", "mega", "57600", "Mega1280.a", "16000000L", "arduino", 126976);
+		map_boardIndex_infor_[7] = Board("Arduino Leonardo", "atmega32u4", "leonardo", "57600","Leonardo.a", "16000000L", "avr109", 28672);
+		map_boardIndex_infor_[8] = Board("Arduino Esplora", "atmega32u4", "leonardo", "57600","Esplora.a", "16000000L", "avr109", 28672);
+		map_boardIndex_infor_[9] = Board("Arduino Micro", "atmega32u4", "micro", "57600","Micro.a", "16000000L", "avr109", 28672);
+		map_boardIndex_infor_[10] = Board("Arduino Mini (328)", "atmega328p", "eightanaloginputs", "115200","Mini328.a", "16000000L", "arduino", 28672);
+		map_boardIndex_infor_[11] = Board("Arduino Mini (168)", "atmega168", "eightanaloginputs", "19200","Mini168.a", "16000000L", "arduino", 14336);
+		//Ethernet
+		map_boardIndex_infor_[12] = Board("Arduino Ethernet", "atmega328p", "standard", "115200", "Ethernet.a", "16000000L", "arduino", 32256);
+		//Fio
+		map_boardIndex_infor_[13] = Board("Arduino Fio", "atmega328p", "eightanaloginputs", "57600","Fio.a", "8000000L", "arduino", 30720);
+		//BT
+		map_boardIndex_infor_[14] = Board("Arduino BT (328)", "atmega328p", "eightanaloginputs", "19200","BT328.a", "16000000L", "arduino", 28672);
+		map_boardIndex_infor_[15] = Board("Arduino BT (168)", "atmega168", "eightanaloginputs", "19200","BT168.a", "16000000L", "arduino", 14336);
+		//LilyPad
+		map_boardIndex_infor_[16] = Board("LilyPad Arduino USB", "atmega32u4", "leonardo", "57600","LilyPadUsb.a", "8000000L", "avr109", 28672);
+		map_boardIndex_infor_[17] = Board("LilyPad Arduino (328)", "atmega328p", "standard", "57600","LilyPad328.a", "8000000L", "arduino", 30720);
+		map_boardIndex_infor_[18] = Board("LilyPad Arduino (168)", "atmega168", "standard", "19200","LilyPad168.a", "8000000L", "arduino", 14336);
+		//ProMini
+		map_boardIndex_infor_[19] = Board("Arduino Pro Mini (328) 5V", "atmega328p", "standard", "57600", "ProMini328_5.a", "16000000L", "arduino", 30720);
+		map_boardIndex_infor_[20] = Board("Arduino Pro Mini (168) 5V", "atmega168", "standard", "19200", "ProMini168_5.a", "16000000L", "arduino", 14336);
+		map_boardIndex_infor_[21] = Board("Arduino Pro Mini (328) 3.3V", "atmega328p", "standard", "57600", "ProMini328_3.a", "8000000L", "arduino", 30720);
+		map_boardIndex_infor_[22] = Board("Arduino Pro Mini (168) 3.3V", "atmega168", "standard", "19200", "ProMini168_3.a", "8000000L", "arduino", 14336);
+		//NG
+		map_boardIndex_infor_[23] = Board("Arduino NG (168)", "atmega168", "standard", "19200","NG168.a", "16000000L", "arduino", 14336);
+		map_boardIndex_infor_[24] = Board("Arduino NG", "atmega8", "standard", "19200","NG8.a", "16000000L", "arduino", 7168);
+	}
 }
 
 UploadBase::~UploadBase()
@@ -77,9 +77,9 @@ UploadBase::~UploadBase()
 
 void UploadBase::start()
 {
-    prepare();//prepare to compile
-    compile();//compileLibrary, linkerCommand
-    writePro();//getUploadCommand, and call QProcess to execute
+	prepare();//prepare to compile
+	compile();//compileLibrary, linkerCommand
+	writePro();//getUploadCommand, and call QProcess to execute
 }
 
 /**
@@ -89,32 +89,32 @@ void UploadBase::start()
  */
 QSet<QString> UploadBase::getAllChildDirPath(const QString &parentDirPath)
 {
-    QDir dir(parentDirPath);
-    dir.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
+	QDir dir(parentDirPath);
+	dir.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
 
-    QSet<QString> tmpDirs;
-    if(dir.entryList().isEmpty())
-    {
-        QSet<QString>tmp;
-        tmp << parentDirPath;
-        return tmp;
-    }
-    else
-    {
-        foreach (const QString &dirName, dir.entryList())
-        {
-            QString childDirPath = parentDirPath + "/" + dirName;
-            if(childDirPath.contains("examples")
-                    || childDirPath.contains("Examples"))
-            {
-                continue;
-            }
-            tmpDirs << childDirPath;
-            tmpDirs += getAllChildDirPath(childDirPath);
-        }
-    }
+	QSet<QString> tmpDirs;
+	if(dir.entryList().isEmpty())
+	{
+		QSet<QString>tmp;
+		tmp << parentDirPath;
+		return tmp;
+	}
+	else
+	{
+		foreach (const QString &dirName, dir.entryList())
+		{
+			QString childDirPath = parentDirPath + "/" + dirName;
+			if(childDirPath.contains("examples")
+					|| childDirPath.contains("Examples"))
+			{
+				continue;
+			}
+			tmpDirs << childDirPath;
+			tmpDirs += getAllChildDirPath(childDirPath);
+		}
+	}
 
-    return tmpDirs;
+	return tmpDirs;
 }
 
 /**
@@ -127,73 +127,73 @@ QSet<QString> UploadBase::getAllChildDirPath(const QString &parentDirPath)
  * @return
  */
 QString UploadBase::getCompilerCommand(const QString &sketchPath, const QString &cpuType,
-                                       const QString &var, const QList<QString> &libPaths, QString workingFrequency, QString workPath)
+									   const QString &var, const QList<QString> &libPaths, QString workingFrequency, QString workPath)
 {
-    QFileInfo infor(sketchPath);
-    QString suffix = infor.suffix();
-    QString cmd;
+	QFileInfo infor(sketchPath);
+	QString suffix = infor.suffix();
+	QString cmd;
 
-    QString id = QString("-DUSB_VID=null -DUSB_PID=null");
-    {
-        if(infor.baseName() == QFileInfo(codePath_).baseName())
-        {
-            //针对leonardo特殊的处理
-            if ("leonardo" == var)
-            {
-                id = " -DUSB_VID=0x2341 -DUSB_PID=0x8036";
-            }
-            else if ("Micro" == var)
-            {
-                id = " -DUSB_VID=0x2341 -DUSB_PID=0x8037";
-            }
-            else if ("Esplora" == var)
-            {
-                id = " -DUSB_VID=0x2341 -DUSB_PID=0x803C";
-            }
-        }
-    }
-    if("c" == suffix
-            || "C" == suffix)
-    {
-        cmd = QString("%1/avr-gcc -c -g -Os -Wall -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3 -MMD %4 -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency).arg(id);
-    }
-    else if("cpp" == suffix
-            || "CPP" == suffix
-            || "java.exe" == infor.fileName())
-    {
-        cmd = QString("%1/avr-g++ -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3 -MMD %4 -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency).arg(id);
-    }
-    else
-    {
-        return QString();
-    }
+	QString id = QString("-DUSB_VID=null -DUSB_PID=null");
+	{
+		if(infor.baseName() == QFileInfo(codePath_).baseName())
+		{
+			//针对leonardo特殊的处理
+			if ("leonardo" == var)
+			{
+				id = " -DUSB_VID=0x2341 -DUSB_PID=0x8036";
+			}
+			else if ("Micro" == var)
+			{
+				id = " -DUSB_VID=0x2341 -DUSB_PID=0x8037";
+			}
+			else if ("Esplora" == var)
+			{
+				id = " -DUSB_VID=0x2341 -DUSB_PID=0x803C";
+			}
+		}
+	}
+	if("c" == suffix
+			|| "C" == suffix)
+	{
+		cmd = QString("%1/avr-gcc -c -g -Os -Wall -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3 -MMD %4 -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency).arg(id);
+	}
+	else if("cpp" == suffix
+			|| "CPP" == suffix
+			|| "java.exe" == infor.fileName())
+	{
+		cmd = QString("%1/avr-g++ -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3 -MMD %4 -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency).arg(id);
+	}
+	else
+	{
+		return QString();
+	}
 
-    cmd += "-I./Arduino/hardware/arduino/cores/arduino ";
-    cmd += "-I./Arduino/hardware/arduino/variants/standard ";
+	cmd += "-I./Arduino/hardware/arduino/cores/arduino ";
+	cmd += "-I./Arduino/hardware/arduino/variants/standard ";
 
-    //加引用路径
-    for(int i = 0; i != libPaths.size(); ++i)
-    {
-        cmd += QString("-I")+libPaths.at(i) + " ";
-    }
-    //这里结构测试的时候再仔细考虑一下
-    if(sketchPath.contains("/")
-            || sketchPath.contains("\\"))
-    {
-        cmd += QString("-I") + QFileInfo(sketchPath).path() + " ";
-    }
-    cmd += QString(sketchPath + " -o "  +workPath + "/" + infor.fileName() + ".o");
+	//加引用路径
+	for(int i = 0; i != libPaths.size(); ++i)
+	{
+		cmd += QString("-I")+libPaths.at(i) + " ";
+	}
+	//这里结构测试的时候再仔细考虑一下
+	if(sketchPath.contains("/")
+			|| sketchPath.contains("\\"))
+	{
+		cmd += QString("-I") + QFileInfo(sketchPath).path() + " ";
+	}
+	cmd += QString(sketchPath + " -o "  +workPath + "/" + infor.fileName() + ".o");
 #ifdef QDEBUG_H
-    QFile file("cmd.txt");
-    if(!file.open(QFile::Append))
-    {
-        qDebug() << "cmd.txt can't open!!";
-    }
+	QFile file("cmd.txt");
+	if(!file.open(QFile::Append))
+	{
+		qDebug() << "cmd.txt can't open!!";
+	}
 #endif
-    file.write(cmd.toAscii());
-    file.write("\n");
-    file.close();
-    return cmd;
+	file.write(cmd.toAscii());
+	file.write("\n");
+	file.close();
+	return cmd;
 }
 
 /**
@@ -206,31 +206,31 @@ QString UploadBase::getCompilerCommand(const QString &sketchPath, const QString 
  */
 void UploadBase::linkerCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath)
 {
-    QString elfPath = filePath + ".elf";
-    QString eepPath = filePath + ".eep";
-    QString hexPath = filePath + ".hex";
-    hexPath_ = hexPath;
-    QString elf = create_elf_fileCommand(filePath, cpuType, staticLibraryPath, workPath);
-    //这部分到整合目录之后就可以统一了
-    QString eep = create_eep_fileCommand("./Arduino/hardware/tools/avr/bin/avr-objcopy", elfPath, eepPath);
-    QString hex = create_hex_fileCommand("./Arduino/hardware/tools/avr/bin/avr-objcopy",elfPath, hexPath);
+	QString elfPath = filePath + ".elf";
+	QString eepPath = filePath + ".eep";
+	QString hexPath = filePath + ".hex";
+	hexPath_ = hexPath;
+	QString elf = create_elf_fileCommand(filePath, cpuType, staticLibraryPath, workPath);
+	//这部分到整合目录之后就可以统一了
+	QString eep = create_eep_fileCommand("./Arduino/hardware/tools/avr/bin/avr-objcopy", elfPath, eepPath);
+	QString hex = create_hex_fileCommand("./Arduino/hardware/tools/avr/bin/avr-objcopy",elfPath, hexPath);
 
-//    qDebug() << "elf: " << elf;
-//    qDebug() << "eep: " << eep;
-//    qDebug() << "hex: " << hex;
+	//    qDebug() << "elf: " << elf;
+	//    qDebug() << "eep: " << eep;
+	//    qDebug() << "hex: " << hex;
 
-    //调用QProcess
-    if(pExternalProcess_)
-    {
-        pExternalProcess_->execute(elf);//生成elf文件
-        pExternalProcess_->execute(eep);//生成eep文件
-        pExternalProcess_->execute(hex);//生成hex文件
+	//调用QProcess
+	if(pExternalProcess_)
+	{
+		pExternalProcess_->execute(elf);//生成elf文件
+		pExternalProcess_->execute(eep);//生成eep文件
+		pExternalProcess_->execute(hex);//生成hex文件
 
-        if(QFile::exists(hexPath))
-        {
-            cout << "Compiliation successful completed!" << endl;
-        }
-    }
+		if(QFile::exists(hexPath))
+		{
+			cout << "Compiliation successful completed!" << endl;
+		}
+	}
 }
 
 /**
@@ -244,24 +244,24 @@ void UploadBase::linkerCommand(const QString &filePath, const QString &cpuType, 
  */
 QString UploadBase::create_elf_fileCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath)
 {
-    QString baseName = QFileInfo(filePath).fileName();
-    QString cmd = QString("%1 -Os -Wl,--gc-sections -mmcu=%2 -o %3 ").arg("./Arduino/hardware/tools/avr/bin/avr-gcc").arg(cpuType).arg(workPath + "/" + baseName + ".elf");
+	QString baseName = QFileInfo(filePath).fileName();
+	QString cmd = QString("%1 -Os -Wl,--gc-sections -mmcu=%2 -o %3 ").arg("./Arduino/hardware/tools/avr/bin/avr-gcc").arg(cpuType).arg(workPath + "/" + baseName + ".elf");
 
-    QDir dir(workPath);
-    dir.setFilter(QDir::Files);
-    QStringList tmp = dir.entryList();
-    foreach (const QString &fileName, tmp)
-    {
-        if(fileName.contains(".cpp.o")
-                || fileName.contains(".c.o"))
-        {
-            cmd += workPath+"/" + fileName + " ";
-        }
-    }
+	QDir dir(workPath);
+	dir.setFilter(QDir::Files);
+	QStringList tmp = dir.entryList();
+	foreach (const QString &fileName, tmp)
+	{
+		if(fileName.contains(".cpp.o")
+				|| fileName.contains(".c.o"))
+		{
+			cmd += workPath+"/" + fileName + " ";
+		}
+	}
 
-    cmd += staticLibraryPath + " -L" + workPath + " -lm";
+	cmd += staticLibraryPath + " -L" + workPath + " -lm";
 
-    return cmd;
+	return cmd;
 }
 
 /**
@@ -274,9 +274,9 @@ QString UploadBase::create_elf_fileCommand(const QString &filePath, const QStrin
  */
 QString UploadBase::create_eep_fileCommand(const QString &toolPath, const QString &elfPath, const QString &eepPath)
 {
-    QString cmd = QString("%1 -O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0 %2 %3").arg(toolPath).arg(elfPath).arg(eepPath);
+	QString cmd = QString("%1 -O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0 %2 %3").arg(toolPath).arg(elfPath).arg(eepPath);
 
-    return cmd;
+	return cmd;
 }
 
 /**
@@ -289,9 +289,9 @@ QString UploadBase::create_eep_fileCommand(const QString &toolPath, const QStrin
  */
 QString UploadBase::create_hex_fileCommand(const QString &toolPath, const QString &elfPath, const QString &hexPath)
 {
-    QString cmd = QString("%1 -O ihex -R .eeprom %2 %3").arg(toolPath).arg(elfPath).arg(hexPath);
+	QString cmd = QString("%1 -O ihex -R .eeprom %2 %3").arg(toolPath).arg(elfPath).arg(hexPath);
 
-    return cmd;
+	return cmd;
 }
 
 /**
@@ -306,12 +306,12 @@ QString UploadBase::create_hex_fileCommand(const QString &toolPath, const QStrin
  * @return 扔给avrdude的命令
  */
 QString UploadBase::getUploadCommand(const QString &avrdudePath, const QString &configPath,
-                                     const QString &cpuType, const QString &serialPort, const QString &baudrate,
-                                     const QString &hexPath, const QString &protocol)
+									 const QString &cpuType, const QString &serialPort, const QString &baudrate,
+									 const QString &hexPath, const QString &protocol)
 {
-    QString cmd = QString("%1 -C%2 -v -v -v -v -p%3 -c%7 -P%4 -b%5 -D -Uflash:w:%6:i").arg(avrdudePath).arg(configPath).arg(cpuType).arg(serialPort).arg(baudrate).arg(hexPath).arg(protocol);
+	QString cmd = QString("%1 -C%2 -v -v -v -v -p%3 -c%7 -P%4 -b%5 -D -Uflash:w:%6:i").arg(avrdudePath).arg(configPath).arg(cpuType).arg(serialPort).arg(baudrate).arg(hexPath).arg(protocol);
 
-    return cmd;
+	return cmd;
 }
 
 /**
@@ -320,80 +320,80 @@ QString UploadBase::getUploadCommand(const QString &avrdudePath, const QString &
  */
 void UploadBase::compileLibrary(const QString &libraryDirPath, const QString &mcu, const QString &var, const QString &workFrequency)
 {
-    QDir dir(libraryDirPath);
-    QStringList filters;
-    filters << "*.cpp" << "*.CPP" << "*.cxx" << "*.cc" << "*.c" << "*.C";
-    dir.setNameFilters(filters);
-    QStringList fileNames = dir.entryList();
-    foreach (const QString &fileName, fileNames)
-    {
-        QString filePath = libraryDirPath + "/" + fileName;
+	QDir dir(libraryDirPath);
+	QStringList filters;
+	filters << "*.cpp" << "*.CPP" << "*.cxx" << "*.cc" << "*.c" << "*.C";
+	dir.setNameFilters(filters);
+	QStringList fileNames = dir.entryList();
+	foreach (const QString &fileName, fileNames)
+	{
+		QString filePath = libraryDirPath + "/" + fileName;
 
-        QSet<QString> headerFiles = getAllReferenceHeaderFileSet(filePath);
-        QSet<QString> libPaths;
-        foreach (const QString &headerFile, headerFiles)
-        {
-            if(map_headerFile_path_.contains(headerFile))
-            {
-                if(map_headerFile_path_.count(headerFile) > 1)
-                {//处理有重复的情况, 有重复的情况下只处理子目录下的
-                    QMultiMap<QString, QString>::iterator iter = map_headerFile_path_.find(headerFile);
-                    while (iter != map_headerFile_path_.end()
-                           && headerFile == iter.key())
-                    {
-                        QString childFilePath =iter.value();
-                        QString parentPath = QFileInfo(filePath).path();
-                        if(childFilePath.contains(parentPath))
-                        {//子目录路径必定包含父级目录的路径
-                            libPaths += parentPath;
-                        }
-                        ++iter;
-                    }
-                }
-                else
-                {
-                    QString childFilePath = map_headerFile_path_.value(headerFile);
-                    if(!childFilePath.isEmpty())
-                    {
-                        libPaths += childFilePath;
-                    }
-                }
-            }
-            else
-            {//
-                //qDebug() << "can't find this header file " << headerFile;
-            }
-        }
+		QSet<QString> headerFiles = getAllReferenceHeaderFileSet(filePath);
+		QSet<QString> libPaths;
+		foreach (const QString &headerFile, headerFiles)
+		{
+			if(map_headerFile_path_.contains(headerFile))
+			{
+				if(map_headerFile_path_.count(headerFile) > 1)
+				{//处理有重复的情况, 有重复的情况下只处理子目录下的
+					QMultiMap<QString, QString>::iterator iter = map_headerFile_path_.find(headerFile);
+					while (iter != map_headerFile_path_.end()
+						   && headerFile == iter.key())
+					{
+						QString childFilePath =iter.value();
+						QString parentPath = QFileInfo(filePath).path();
+						if(childFilePath.contains(parentPath))
+						{//子目录路径必定包含父级目录的路径
+							libPaths += parentPath;
+						}
+						++iter;
+					}
+				}
+				else
+				{
+					QString childFilePath = map_headerFile_path_.value(headerFile);
+					if(!childFilePath.isEmpty())
+					{
+						libPaths += childFilePath;
+					}
+				}
+			}
+			else
+			{//
+				//qDebug() << "can't find this header file " << headerFile;
+			}
+		}
 
-        //编译本文件
-        QString cmd = getCompilerCommand(filePath, mcu, var, libPaths.toList());
-        //qDebug() << cmd;
-        pExternalProcess_->execute(cmd);
-        alreadyCompile_.clear();
-    }
+		//编译本文件
+		QString cmd = getCompilerCommand(filePath, mcu, var, libPaths.toList());
+		//qDebug() << cmd;
+		pExternalProcess_->execute(cmd);
+		alreadyCompile_.clear();
+	}
 
-    //递归遍历子目录
-    dir.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
-    QStringList dirNames = dir.entryList();
-    if(dirNames.isEmpty())
-    {
-        return;
-    }
-    else
-    {
-        foreach (const QString &dirName, dirNames)
-        {
-            if(".settings" == dirName
-                    || "examples" == dirName
-                    || "doc" == dirName
-                    || "Examples" == dirName
-                    || ".svn" == dirName)
-            {
-                continue;
-            }
-            compileLibrary(libraryDirPath + "/" + dirName, mcu, var, workFrequency);
-        }
-    }
+	//递归遍历子目录
+	dir.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
+	QStringList dirNames = dir.entryList();
+	if(dirNames.isEmpty())
+	{
+		return;
+	}
+	else
+	{
+		foreach (const QString &dirName, dirNames)
+		{
+			if(".settings" == dirName
+					|| "examples" == dirName
+					|| "doc" == dirName
+					|| "Examples" == dirName
+					|| ".svn" == dirName)
+			{
+				continue;
+			}
+			compileLibrary(libraryDirPath + "/" + dirName, mcu, var, workFrequency);
+		}
+	}
 }
 
 /**
@@ -406,34 +406,34 @@ void UploadBase::compileLibrary(const QString &libraryDirPath, const QString &mc
  */
 void UploadBase::copyDirectory(const QString &srcPath, const QString &desPath)
 {
-    QDir dir(srcPath);
-    {
-        dir.setFilter(QDir::Files);
-        foreach (const QString &fileName, dir.entryList())
-        {
-            QString srcFilePath = srcPath + "/" + fileName;
-            QString desFilePath = srcPath + "/" + fileName;
-            if(!copyFile(srcFilePath, desFilePath))
-            {
-                qDebug() << "copy file error! from " << srcFilePath << "to " << desFilePath;
-            }
-        }
-    }
-    dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
-    QStringList dirNames = dir.entryList();
-    if(dirNames.isEmpty())
-    {
-        return;
-    }
-    else
-    {
-        foreach (const QString &dirName, dirNames)
-        {
-            QString newSrcPath = srcPath + "/" + dirName;
-            QString newDesPath = desPath + "/" + dirName;
-            copyDirectory(newSrcPath, newDesPath);
-        }
-    }
+	QDir dir(srcPath);
+	{
+		dir.setFilter(QDir::Files);
+		foreach (const QString &fileName, dir.entryList())
+		{
+			QString srcFilePath = srcPath + "/" + fileName;
+			QString desFilePath = srcPath + "/" + fileName;
+			if(!copyFile(srcFilePath, desFilePath))
+			{
+				qDebug() << "copy file error! from " << srcFilePath << "to " << desFilePath;
+			}
+		}
+	}
+	dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+	QStringList dirNames = dir.entryList();
+	if(dirNames.isEmpty())
+	{
+		return;
+	}
+	else
+	{
+		foreach (const QString &dirName, dirNames)
+		{
+			QString newSrcPath = srcPath + "/" + dirName;
+			QString newDesPath = desPath + "/" + dirName;
+			copyDirectory(newSrcPath, newDesPath);
+		}
+	}
 }
 
 /**
@@ -446,166 +446,201 @@ void UploadBase::copyDirectory(const QString &srcPath, const QString &desPath)
  */
 bool UploadBase::copyFile(const QString &srcPath, const QString &desPath)
 {
-    //读数据
-    QFile file(srcPath);
-    if(!file.open(QFile::ReadOnly))
-    {
-        qDebug() << "open src file fail" << srcPath;
-        return false;
-    }
+	//读数据
+	QFile file(srcPath);
+	if(!file.open(QFile::ReadOnly))
+	{
+		qDebug() << "open src file fail" << srcPath;
+		return false;
+	}
 
-    QByteArray bytes =  file.readAll();
-    file.close();
+	QByteArray bytes =  file.readAll();
+	file.close();
 
-    ////////////////////////////////
-    //在这里要确保path可用
-    {
-        QDir pathTest("./");
-        QString oldPath = pathTest.currentPath();
+	////////////////////////////////
+	//在这里要确保path可用
+	{
+		QDir pathTest("./");
+		QString oldPath = pathTest.currentPath();
 
-        pathTest.setPath(desPath);
-        if(!pathTest.exists())
-        {
-            qDebug() << "not exists the path, and it will try to cerate it:" << desPath;
-            if(!pathTest.mkpath(desPath))
-            {
-                qDebug() << "create path fail!!!!";
-                return false;
-            }
-        }
-        pathTest.setPath(oldPath);
-    }
-    ////////////////////////////////
+		pathTest.setPath(desPath);
+		if(!pathTest.exists())
+		{
+			qDebug() << "not exists the path, and it will try to cerate it:" << desPath;
+			if(!pathTest.mkpath(desPath))
+			{
+				qDebug() << "create path fail!!!!";
+				return false;
+			}
+		}
+		pathTest.setPath(oldPath);
+	}
+	////////////////////////////////
 
-    QFile desFile(desPath);
-    if(!desFile.open(QFile::WriteOnly))
-    {
-        qDebug() << "open des file fail " << desPath;
-        return false;
-    }
+	QFile desFile(desPath);
+	if(!desFile.open(QFile::WriteOnly))
+	{
+		qDebug() << "open des file fail " << desPath;
+		return false;
+	}
 
-    desFile.write(bytes);
-    desFile.waitForBytesWritten(10);
-    desFile.close();
+	desFile.write(bytes);
+	desFile.waitForBytesWritten(10);
+	desFile.close();
 
-    return true;
+	return true;
 }
 
 void UploadBase::prepare()
 {
-    QSet<QString> headerFiles = getReferenceHeaderFilesFromSingleFile(codePath_);
-    QSet<QString> tmpLibDirPath;
-    foreach (const QString header, headerFiles)
-    {
-        if(map_libName_infor_.contains(header))
-        {
-            tmpLibDirPath << map_libName_infor_.value(header).libPath;
-        }
-    }
+	QSet<QString> headerFiles = getReferenceHeaderFilesFromSingleFile(codePath_);
+	QSet<QString> tmpLibDirPath;
+	foreach (const QString header, headerFiles)
+	{
+		if(map_libName_infor_.contains(header))
+		{
+			tmpLibDirPath << map_libName_infor_.value(header).libPath;
+		}
+	}
 
-    libraryPaths_ = tmpLibDirPath;
+	libraryPaths_ = tmpLibDirPath;
 }
 
 void UploadBase::compile()
 {
-    //这里的CPU类型是需要通过一个数据结构获取的
-    if(map_boardIndex_infor_.contains(boardIndex_))
-    {
-        QString mcu = map_boardIndex_infor_[boardIndex_].mcu;
-        QString var = map_boardIndex_infor_[boardIndex_].variant;
-        QString frequency = map_boardIndex_infor_[boardIndex_].workingFrequency;
-        QString cmd = getCompilerCommand(codePath_, mcu, var, libraryPaths_.toList(), frequency);
-        //qDebug() << cmd;
-        //pExternalProcess_->execute(cmd);
-        pExternalProcess_->start(cmd);
-        pExternalProcess_->waitForFinished();
-        foreach (const QString &dirPath, libraryPaths_)
-        {
-            compileLibrary(dirPath, mcu, var, frequency);
-        }
+	//这里的CPU类型是需要通过一个数据结构获取的
+	if(map_boardIndex_infor_.contains(boardIndex_))
+	{
+		QString mcu = map_boardIndex_infor_[boardIndex_].mcu;
+		QString var = map_boardIndex_infor_[boardIndex_].variant;
+		QString frequency = map_boardIndex_infor_[boardIndex_].workingFrequency;
+		QString cmd = getCompilerCommand(codePath_, mcu, var, libraryPaths_.toList(), frequency);
+		//qDebug() << cmd;
+		//pExternalProcess_->execute(cmd);
+		pExternalProcess_->start(cmd);
+		pExternalProcess_->waitForFinished();
+		foreach (const QString &dirPath, libraryPaths_)
+		{
+			compileLibrary(dirPath, mcu, var, frequency);
+		}
 
-        QString staticLibrary = map_boardIndex_infor_[boardIndex_].staticLibrary;
-        QString staticLibPath = QString("./Arduino/staticLibrary/%1").arg(staticLibrary);
-        linkerCommand(codePath_, mcu, staticLibPath);
-    }
-    else
-    {
-        qDebug() << "can't find index: "<< boardIndex_;
-        return;
-    }
+		QString staticLibrary = map_boardIndex_infor_[boardIndex_].staticLibrary;
+		QString staticLibPath = QString("./Arduino/staticLibrary/%1").arg(staticLibrary);
+		linkerCommand(codePath_, mcu, staticLibPath);
+	}
+	else
+	{
+		qDebug() << "can't find index: "<< boardIndex_;
+		return;
+	}
 }
 
 void UploadBase::writePro()
 {
-    if(map_boardIndex_infor_.contains(boardIndex_))
-    {
-        QString mcu = map_boardIndex_infor_[boardIndex_].mcu;
-        QString baudrate = map_boardIndex_infor_[boardIndex_].baudrate;
-        QString serialPort = serialPort_;
-        QString protocol = map_boardIndex_infor_[boardIndex_].protocol;
+	if(map_boardIndex_infor_.contains(boardIndex_))
+	{
+		QString mcu = map_boardIndex_infor_[boardIndex_].mcu;
+		QString baudrate = map_boardIndex_infor_[boardIndex_].baudrate;
+		QString serialPort = serialPort_;
+		QString protocol = map_boardIndex_infor_[boardIndex_].protocol;
 
-        if("leonardo" == map_boardIndex_infor_[boardIndex_].variant)
-        {
-            QSet<QString> portsOld;
-            foreach (QextPortInfo portInfor, QextSerialEnumerator::getPorts())
-            {
-                portsOld << portInfor.portName;
-            }
+		if("leonardo" == map_boardIndex_infor_[boardIndex_].variant)
+		{
+			QSet<QString> portsOld;
+			foreach (QextPortInfo portInfor, QextSerialEnumerator::getPorts())
+			{
+				portsOld << portInfor.portName;
+			}
 
-            PortSettings setting;
-            setting.BaudRate = BAUD1200;
-            setting.FlowControl = FLOW_OFF;
-            setting.DataBits = DATA_8;
-            setting.StopBits = STOP_2;
-            setting.Parity = PAR_NONE;
+			PortSettings setting;
+			setting.BaudRate = BAUD1200;
+			//setting.FlowControl = FLOW_OFF;
+			setting.DataBits = DATA_8;
+			setting.StopBits = STOP_1;
+			setting.Parity = PAR_NONE;
+#ifdef Q_OS_WIN32
+			QextSerialPort *pScanSerialPort = new QextSerialPort(serialPort_, setting);
+			//QextSerialPort *pScanSerialPort = new QextSerialPort(serialPort_, setting);
+#else
+			QString tmpPort = QString("/dev/")+serialPort_;
+			QextSerialPort *pScanSerialPort = new QextSerialPort(tmpPort, setting, QextSerialPort::Polling);
+#endif
+			if(!pScanSerialPort->open(QIODevice::ReadWrite))
+			{
+				qDebug() << "serial prot open fail!";
+				qDebug() << pScanSerialPort->errorString();
+			}
 
-            QextSerialPort *pScanSerialPort = new QextSerialPort(serialPort_, setting, QextSerialPort::Polling);
-
-            if(!pScanSerialPort->open(QIODevice::ReadWrite))
-            {
-                qDebug() << "serial prot open fail!";
-                qDebug() << pScanSerialPort->errorString();
-            }
-
-            pScanSerialPort->close();
-
-            QSet<QString> portsNew;
-            do
-            {
-                QList<QextPortInfo> tmp = QextSerialEnumerator::getPorts();
-                foreach (QextPortInfo portInfor, tmp)
-                {
-                    portsNew << portInfor.portName;
-                }
-            }while (portsNew.size() <= portsOld.size());
-
-            QSet<QString> result = portsNew - portsOld;
-            if(!result.isEmpty())
-            {
-                serialPort = *(result.begin());
-            }
-        }
+			pScanSerialPort->close();
 
 #ifdef Q_OS_WIN32
-        QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, serialPort, baudrate, hexPath_, protocol);
-#elif defined(Q_OS_LINUX)
-        QString cmd = getUploadCommand("./Arduino/hardware/tools/avrdude", "./Arduino/hardware/tools/avrdude.conf", mcu, QString("/dev/") + serialPort, baudrate, hexPath_);
+			QSet<QString> portsNew;
+			do
+			{
+				QList<QextPortInfo> tmp = QextSerialEnumerator::getPorts();
+				foreach (QextPortInfo portInfor, tmp)
+				{
+					portsNew << portInfor.portName;
+				}
+			}while (portsNew.size() <= portsOld.size());
+
+			QSet<QString> result = portsNew - portsOld;
+			if(!result.isEmpty())
+			{
+				serialPort = *(result.begin());
+			}
 #elif defined(Q_OS_MAC)
-        QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, QString("/dev/") + serialPort, baudrate, hexPath_);
+
+			QSet<QString> portsNew;
+			QList<QextPortInfo> tmp;
+
+			QSet<QString> result;
+			int elapsed = 0;
+			QString foundPort;
+			while (elapsed < 10000)
+			{
+				tmp = QextSerialEnumerator::getPorts();
+				foreach (QextPortInfo portInfor, tmp)
+				{
+					portsNew << portInfor.portName;
+				}
+				result = portsNew - portsOld;
+				if(result.size() > 0)
+				{
+					foundPort = result.toList().at(0);
+					break;
+				}
+				portsOld = portsNew;
+
+				Sleep::sleep(250);
+				elapsed += 250;
+			}
+
+
 #endif
-        qDebug() << cmd;
-//        pExternalProcess_->execute(cmd);
-        if(!QFile::exists(hexPath_))
-        {
-            return;
-        }
-        pExternalProcess_->start(cmd);
-        pExternalProcess_->waitForFinished(30000);
-    }
-    else
-    {
-        qDebug() << "uploader error!";
-    }
+		}
+
+#ifdef Q_OS_WIN32
+		QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, serialPort, baudrate, hexPath_, protocol);
+#elif defined(Q_OS_LINUX)
+		QString cmd = getUploadCommand("./Arduino/hardware/tools/avrdude", "./Arduino/hardware/tools/avrdude.conf", mcu, QString("/dev/") + serialPort, baudrate, hexPath_, protocol);
+#elif defined(Q_OS_MAC)
+		QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, QString("/dev/") + serialPort_, baudrate, hexPath_, protocol);
+#endif
+		//Sleep::sleep(7000);
+		qDebug() << cmd;
+		//        pExternalProcess_->execute(cmd);
+		if(!QFile::exists(hexPath_))
+		{
+			return;
+		}
+		pExternalProcess_->start(cmd);
+		pExternalProcess_->waitForFinished(30000);
+	}
+	else
+	{
+		qDebug() << "uploader error!";
+	}
 }
 
 /**
@@ -617,73 +652,73 @@ void UploadBase::writePro()
  */
 QSet<QString> UploadBase::getAllReferenceHeaderFileSet(const QString &filePath)
 {
-    QSet<QString> libReference;
-    libReference = getReferenceHeaderFilesFromSingleFile(filePath);
+	QSet<QString> libReference;
+	libReference = getReferenceHeaderFilesFromSingleFile(filePath);
 
-    foreach (const QString &fileName, libReference.toList())
-    {//其实在这个循环之中就过滤了标准的库函数了
-        if(map_libName_infor_.contains(fileName))
-        {//如果是library
-            LibraryReferenceInfor libRefInforInfor = map_libName_infor_.value(fileName);
-            libReference += libRefInforInfor.libReference;
-        }
-        else if(QFileInfo(filePath).baseName() == QFileInfo(fileName).baseName())
-        {//处理当前目录 因为.cpp与.h都会包含其他library
-            //QString tmpPath =filePath.left(filePath.indexOf(".")) + ".h";
-            QString tmpPath;
-            if(filePath.contains(".cpp", Qt::CaseInsensitive))
-            {
-                tmpPath = QString(filePath).replace(QString(".cpp"), QString(".h"));
-            }
-            else if(filePath.contains(".c", Qt::CaseInsensitive))
-            {
-                tmpPath = QString(filePath).replace(QString(".c"), QString(".h"));
-            }
-            else
-            {
-                qDebug() << "can't find !!!!!!!!!!!";
-            }
-            if(!alreadyCompile_.contains(tmpPath))
-            {
-                alreadyCompile_ << tmpPath;
-                libReference += getAllReferenceHeaderFileSet(tmpPath);
-            }
-        }
-        else if (map_headerFile_path_.contains(fileName))
-        {
-            if(map_headerFile_path_.count(fileName) > 1)
-            {//处理有重复的情况, 有重复的情况下只处理子目录下的
-                QMultiMap<QString, QString>::iterator iter = map_headerFile_path_.find(fileName);
-                while (iter != map_headerFile_path_.end()
-                       && fileName == iter.key())
-                {
-                    QString childFilePath =iter.value() + "/" + fileName;
-                    QString parentPath = QFileInfo(filePath).path();
-                    if(childFilePath.contains(parentPath))
-                    {//子目录路径必定包含父级目录的路径
-                        if(!alreadyCompile_.contains(childFilePath))
-                        {
-                            alreadyCompile_ << childFilePath;
-                            libReference += getAllReferenceHeaderFileSet(childFilePath);
-                        }
-                    }
-                    ++iter;
-                }
-            }
-            else
-            {
-                QString childFilePath = map_headerFile_path_.value(fileName) + "/" + fileName;
-                if(!alreadyCompile_.contains(childFilePath))
-                {
-                    alreadyCompile_ << childFilePath;
-                    libReference += getAllReferenceHeaderFileSet(childFilePath );
-                }
-            }
-        }
-    }
+	foreach (const QString &fileName, libReference.toList())
+	{//其实在这个循环之中就过滤了标准的库函数了
+		if(map_libName_infor_.contains(fileName))
+		{//如果是library
+			LibraryReferenceInfor libRefInforInfor = map_libName_infor_.value(fileName);
+			libReference += libRefInforInfor.libReference;
+		}
+		else if(QFileInfo(filePath).baseName() == QFileInfo(fileName).baseName())
+		{//处理当前目录 因为.cpp与.h都会包含其他library
+			//QString tmpPath =filePath.left(filePath.indexOf(".")) + ".h";
+			QString tmpPath;
+			if(filePath.contains(".cpp", Qt::CaseInsensitive))
+			{
+				tmpPath = QString(filePath).replace(QString(".cpp"), QString(".h"));
+			}
+			else if(filePath.contains(".c", Qt::CaseInsensitive))
+			{
+				tmpPath = QString(filePath).replace(QString(".c"), QString(".h"));
+			}
+			else
+			{
+				qDebug() << "can't find !!!!!!!!!!!";
+			}
+			if(!alreadyCompile_.contains(tmpPath))
+			{
+				alreadyCompile_ << tmpPath;
+				libReference += getAllReferenceHeaderFileSet(tmpPath);
+			}
+		}
+		else if (map_headerFile_path_.contains(fileName))
+		{
+			if(map_headerFile_path_.count(fileName) > 1)
+			{//处理有重复的情况, 有重复的情况下只处理子目录下的
+				QMultiMap<QString, QString>::iterator iter = map_headerFile_path_.find(fileName);
+				while (iter != map_headerFile_path_.end()
+					   && fileName == iter.key())
+				{
+					QString childFilePath =iter.value() + "/" + fileName;
+					QString parentPath = QFileInfo(filePath).path();
+					if(childFilePath.contains(parentPath))
+					{//子目录路径必定包含父级目录的路径
+						if(!alreadyCompile_.contains(childFilePath))
+						{
+							alreadyCompile_ << childFilePath;
+							libReference += getAllReferenceHeaderFileSet(childFilePath);
+						}
+					}
+					++iter;
+				}
+			}
+			else
+			{
+				QString childFilePath = map_headerFile_path_.value(fileName) + "/" + fileName;
+				if(!alreadyCompile_.contains(childFilePath))
+				{
+					alreadyCompile_ << childFilePath;
+					libReference += getAllReferenceHeaderFileSet(childFilePath );
+				}
+			}
+		}
+	}
 
-    libReference.remove("Arduino.h");
-    return libReference;
+	libReference.remove("Arduino.h");
+	return libReference;
 }
 
 /**
@@ -694,23 +729,23 @@ QSet<QString> UploadBase::getAllReferenceHeaderFileSet(const QString &filePath)
  */
 QSet<QString> UploadBase::getReferenceHeaderFilesFromSingleFile(const QString &filePath)
 {
-    QFile file(filePath);
+	QFile file(filePath);
 
-    if(!file.open(QFile::ReadOnly))
-    {
-        qDebug() << "getHeaderFiles file can't open " << filePath;
-        qDebug() << file.errorString();
-        file.close();
-        return QSet<QString>();
-    }
+	if(!file.open(QFile::ReadOnly))
+	{
+		qDebug() << "getHeaderFiles file can't open " << filePath;
+		qDebug() << file.errorString();
+		file.close();
+		return QSet<QString>();
+	}
 
-    QString text = file.readAll();
-    QSet<QString> headerFiles = getAllMatchResults(text);
-    headerFiles.remove("Arduino.h");
+	QString text = file.readAll();
+	QSet<QString> headerFiles = getAllMatchResults(text);
+	headerFiles.remove("Arduino.h");
 
-    file.close();
+	file.close();
 
-    return headerFiles;
+	return headerFiles;
 }
 
 /**
@@ -724,20 +759,20 @@ QSet<QString> UploadBase::getReferenceHeaderFilesFromSingleFile(const QString &f
  */
 QSet<QString> UploadBase::getAllMatchResults(const QString text, const QString regexp)
 {
-    QSet<QString> resultSet;
+	QSet<QString> resultSet;
 
-    QRegExp rx(regexp);
-    int pos = 0;
+	QRegExp rx(regexp);
+	int pos = 0;
 
-    while ((pos = rx.indexIn(text, pos)) != -1)
-    {
-        pos += rx.matchedLength();
-        QString result = rx.cap(0);
-        resultSet << result;
-    }
+	while ((pos = rx.indexIn(text, pos)) != -1)
+	{
+		pos += rx.matchedLength();
+		QString result = rx.cap(0);
+		resultSet << result;
+	}
 
-    resultSet.remove("Arduino.h");
-    return resultSet;
+	resultSet.remove("Arduino.h");
+	return resultSet;
 }
 
 /**
@@ -746,38 +781,38 @@ QSet<QString> UploadBase::getAllMatchResults(const QString text, const QString r
  */
 void UploadBase::scanAllLibraryHeaderFile(const QString &libraryPath)
 {
-    QDir dir(libraryPath);
-    dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot); // filter . and ..
+	QDir dir(libraryPath);
+	dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot); // filter . and ..
 
-    foreach (const QString dirName, dir.entryList())
-    {
-        QString dirPath = libraryPath + "/" + dirName + "/" + dirName + ".h";
-        QFile file(dirPath);
+	foreach (const QString dirName, dir.entryList())
+	{
+		QString dirPath = libraryPath + "/" + dirName + "/" + dirName + ".h";
+		QFile file(dirPath);
 
-        if(!file.open(QFile::ReadOnly))
-        {
-            qDebug() << "can't open file in path: " << dirPath;
-            file.close();
-            continue;
-        }
+		if(!file.open(QFile::ReadOnly))
+		{
+			qDebug() << "can't open file in path: " << dirPath;
+			file.close();
+			continue;
+		}
 
-        QString code = file.readAll();
-        QSet<QString> library = getAllMatchResults(code, "\\w+\\.h");
+		QString code = file.readAll();
+		QSet<QString> library = getAllMatchResults(code, "\\w+\\.h");
 
-        if(library.isEmpty())
-        {
-            qDebug() << tr("file: %1").arg(dirName) <<"not have include other library";
-            file.close();
-            continue;
-        }
+		if(library.isEmpty())
+		{
+			qDebug() << tr("file: %1").arg(dirName) <<"not have include other library";
+			file.close();
+			continue;
+		}
 
-        LibraryReferenceInfor libReferInfor;
-        libReferInfor.libName = dirName;
-        libReferInfor.libPath = libraryPath + "/" + dirName;
-        libReferInfor.libReference = library;
+		LibraryReferenceInfor libReferInfor;
+		libReferInfor.libName = dirName;
+		libReferInfor.libPath = libraryPath + "/" + dirName;
+		libReferInfor.libReference = library;
 
-        map_libName_infor_.insert(QString(dirName + ".h"), libReferInfor);
-    }
+		map_libName_infor_.insert(QString(dirName + ".h"), libReferInfor);
+	}
 }
 
 /**
@@ -786,43 +821,43 @@ void UploadBase::scanAllLibraryHeaderFile(const QString &libraryPath)
  */
 void UploadBase::scanAllheaderFile(const QString &path)
 {
-    //处理文件
-    {
-        QDir dir(path);
-        QStringList filter;
-        filter << "*.h";
-        dir.setNameFilters(filter);
-        foreach (const QString &fileName, dir.entryList())
-        {
-            QString filePath = path + "/" + fileName;
-            map_headerFile_path_.insert(fileName, path);
-        }
-    }
-    //处理子目录
-    {
-        QDir dir(path);
-        dir.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
-        foreach (const QString &dirName, dir.entryList())
-        {
-            QString dirPath = path + "/" + dirName;
-            scanAllheaderFile(dirPath);
-        }
-    }
+	//处理文件
+	{
+		QDir dir(path);
+		QStringList filter;
+		filter << "*.h";
+		dir.setNameFilters(filter);
+		foreach (const QString &fileName, dir.entryList())
+		{
+			QString filePath = path + "/" + fileName;
+			map_headerFile_path_.insert(fileName, path);
+		}
+	}
+	//处理子目录
+	{
+		QDir dir(path);
+		dir.setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
+		foreach (const QString &dirName, dir.entryList())
+		{
+			QString dirPath = path + "/" + dirName;
+			scanAllheaderFile(dirPath);
+		}
+	}
 }
 
 void UploadBase::slotReadyReadStandardOutput()
 {
-    cout << "+++++++++++++++begin std out put++++++++++++++++++\n";
-    QString stdOutPut = pExternalProcess_->readAllStandardOutput();
-    cout << stdOutPut.toAscii().data() << endl;
-    cout << "+++++++++++++++end std out put+++++++++++++++++++\n";
+//	cout << "+++++++++++++++begin std out put++++++++++++++++++\n";
+	QString stdOutPut = pExternalProcess_->readAllStandardOutput();
+	cout << stdOutPut.toAscii().data() << endl;
+//	cout << "+++++++++++++++end std out put+++++++++++++++++++\n";
 }
 
 void UploadBase::slotreadyReadStandardError()
 {
-    cerr << "+++++++++++++++begin std error ++++++++++++++++++\n";
-    QString errorString = pExternalProcess_->readAllStandardError();
+//	cerr << "+++++++++++++++begin std error ++++++++++++++++++\n";
+	QString errorString = pExternalProcess_->readAllStandardError();
 
-    cerr << errorString.toAscii().data() << endl;
-    cerr << "+++++++++++++++end std error+++++++++++++++++++\n";
+	cerr << errorString.toAscii().data() << endl;
+//	cerr << "+++++++++++++++end std error+++++++++++++++++++\n";
 }
