@@ -123,7 +123,8 @@ protected:
     QString create_hex_fileCommand(const QString &toolPath, const QString &elfPath, const QString &hexPath);
 
     //上传
-    QString getUploadCommand(const QString &avrdudePath, const QString &configPath, const QString &cpuType, const QString &serialPort, const QString &baudrate, const QString &hexPath, const QString &protocol);
+	QString getUploadCommand(const QString &avrdudePath, const QString &configPath, const QString &cpuType,
+							 const QString &serialPort, const QString &baudrate, const QString &hexPath, const QString &protocol);
     QSet<QString> getAllChildDirPath(const QString &parentDirPath);
 
     //复制库相关,为了防止有同名文件导致的覆盖问题.目前暂时不使用

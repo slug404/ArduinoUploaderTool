@@ -215,9 +215,9 @@ void UploadBase::linkerCommand(const QString &filePath, const QString &cpuType, 
     QString eep = create_eep_fileCommand("./Arduino/hardware/tools/avr/bin/avr-objcopy", elfPath, eepPath);
     QString hex = create_hex_fileCommand("./Arduino/hardware/tools/avr/bin/avr-objcopy",elfPath, hexPath);
 
-//    qDebug() << "elf: " << elf;
-//    qDebug() << "eep: " << eep;
-//    qDebug() << "hex: " << hex;
+    //    qDebug() << "elf: " << elf;
+    //    qDebug() << "eep: " << eep;
+    //    qDebug() << "hex: " << hex;
 
     //调用QProcess
     if(pExternalProcess_)
@@ -554,13 +554,17 @@ void UploadBase::writePro()
 
             PortSettings setting;
             setting.BaudRate = BAUD1200;
-            setting.FlowControl = FLOW_OFF;
+            //setting.FlowControl = FLOW_OFF;
             setting.DataBits = DATA_8;
-            setting.StopBits = STOP_2;
+            setting.StopBits = STOP_1;
             setting.Parity = PAR_NONE;
-
-            QextSerialPort *pScanSerialPort = new QextSerialPort(serialPort_, setting, QextSerialPort::Polling);
-
+#ifdef Q_OS_WIN32
+            QextSerialPort *pScanSerialPort = new QextSerialPort(serialPort_, setting);
+            //QextSerialPort *pScanSerialPort = new QextSerialPort(serialPort_, setting);
+#else
+            QString tmpPort = QString("/dev/")+serialPort_;
+            QextSerialPort *pScanSerialPort = new QextSerialPort(tmpPort, setting, QextSerialPort::Polling);
+#endif
             if(!pScanSerialPort->open(QIODevice::ReadWrite))
             {
                 qDebug() << "serial prot open fail!";
@@ -569,6 +573,7 @@ void UploadBase::writePro()
 
             pScanSerialPort->close();
 
+#ifdef Q_OS_WIN32
             QSet<QString> portsNew;
             do
             {
@@ -584,17 +589,47 @@ void UploadBase::writePro()
             {
                 serialPort = *(result.begin());
             }
+#elif defined(Q_OS_MAC)
+
+            QSet<QString> portsNew;
+            QList<QextPortInfo> tmp;
+
+            QSet<QString> result;
+            int elapsed = 0;
+            QString foundPort;
+            while (elapsed < 10000)
+            {
+                tmp = QextSerialEnumerator::getPorts();
+                foreach (QextPortInfo portInfor, tmp)
+                {
+                    portsNew << portInfor.portName;
+                }
+                result = portsNew - portsOld;
+                if(result.size() > 0)
+                {
+                    foundPort = result.toList().at(0);
+                    break;
+                }
+                portsOld = portsNew;
+
+                Sleep::sleep(250);
+                elapsed += 250;
+            }
+
+
+#endif
         }
 
 #ifdef Q_OS_WIN32
         QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, serialPort, baudrate, hexPath_, protocol);
 #elif defined(Q_OS_LINUX)
-        QString cmd = getUploadCommand("./Arduino/hardware/tools/avrdude", "./Arduino/hardware/tools/avrdude.conf", mcu, QString("/dev/") + serialPort, baudrate, hexPath_);
+        QString cmd = getUploadCommand("./Arduino/hardware/tools/avrdude", "./Arduino/hardware/tools/avrdude.conf", mcu, QString("/dev/") + serialPort, baudrate, hexPath_, protocol);
 #elif defined(Q_OS_MAC)
-        QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, QString("/dev/") + serialPort, baudrate, hexPath_);
+        QString cmd = getUploadCommand("./Arduino/hardware/tools/avr/bin/avrdude", "./Arduino/hardware/tools/avr/etc/avrdude.conf", mcu, QString("/dev/") + serialPort_, baudrate, hexPath_, protocol);
 #endif
+        //Sleep::sleep(7000);
         qDebug() << cmd;
-//        pExternalProcess_->execute(cmd);
+        //        pExternalProcess_->execute(cmd);
         if(!QFile::exists(hexPath_))
         {
             return;
@@ -812,17 +847,17 @@ void UploadBase::scanAllheaderFile(const QString &path)
 
 void UploadBase::slotReadyReadStandardOutput()
 {
-    cout << "+++++++++++++++begin std out put++++++++++++++++++\n";
+//	cout << "+++++++++++++++begin std out put++++++++++++++++++\n";
     QString stdOutPut = pExternalProcess_->readAllStandardOutput();
     cout << stdOutPut.toAscii().data() << endl;
-    cout << "+++++++++++++++end std out put+++++++++++++++++++\n";
+//	cout << "+++++++++++++++end std out put+++++++++++++++++++\n";
 }
 
 void UploadBase::slotreadyReadStandardError()
 {
-    cerr << "+++++++++++++++begin std error ++++++++++++++++++\n";
+//	cerr << "+++++++++++++++begin std error ++++++++++++++++++\n";
     QString errorString = pExternalProcess_->readAllStandardError();
 
     cerr << errorString.toAscii().data() << endl;
-    cerr << "+++++++++++++++end std error+++++++++++++++++++\n";
+//	cerr << "+++++++++++++++end std error+++++++++++++++++++\n";
 }
