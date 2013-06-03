@@ -184,15 +184,15 @@ QString UploadBase::getCompilerCommand(const QString &sketchPath, const QString 
     }
     cmd += QString(sketchPath + " -o "  +workPath + "/" + infor.fileName() + ".o");
 #ifdef QDEBUG_H
-    QFile file("cmd.txt");
-    if(!file.open(QFile::Append))
-    {
-        qDebug() << "cmd.txt can't open!!";
-    }
+//    QFile file("cmd.txt");
+//    if(!file.open(QFile::Append))
+//    {
+//        qDebug() << "cmd.txt can't open!!";
+//    }
 #endif
-    file.write(cmd.toAscii());
-    file.write("\n");
-    file.close();
+//    file.write(cmd.toAscii());
+//    file.write("\n");
+//    file.close();
     return cmd;
 }
 

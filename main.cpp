@@ -20,10 +20,10 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
 
 #ifdef QDEBUG_H
-    if(QFile::exists("cmd.txt"))
-    {
-        QFile::remove("cmd.txt");
-    }
+//    if(QFile::exists("cmd.txt"))
+//    {
+//        QFile::remove("cmd.txt");
+//    }
 #endif
 
     if(PARAMER_COUNT == argc)
