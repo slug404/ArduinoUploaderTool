@@ -561,17 +561,29 @@ void UploadBase::writePro()
 #ifdef Q_OS_WIN32
             QextSerialPort *pScanSerialPort = new QextSerialPort(serialPort_, setting);
             //QextSerialPort *pScanSerialPort = new QextSerialPort(serialPort_, setting);
+#elif defined(Q_OS_MAC)
+			QString tmpPort = QString("/dev/")+serialPort_;
+			QString cmd = "./reset ";
+			cmd += tmpPort;
+			qDebug() << cmd;
+			//QProcess::execute(cmd);
+			QProcess pro;
+			pro.start(cmd);
+			pro.waitForFinished(100);
+			pro.close();
 #else
-            QString tmpPort = QString("/dev/")+serialPort_;
-            QextSerialPort *pScanSerialPort = new QextSerialPort(tmpPort, setting, QextSerialPort::Polling);
+			QString tmpPort = QString("/dev/")+serialPort_;
+			QextSerialPort *pScanSerialPort = new QextSerialPort(tmpPort, setting, QextSerialPort::Polling);
 #endif
-            if(!pScanSerialPort->open(QIODevice::ReadWrite))
-            {
-                qDebug() << "serial prot open fail!";
-                qDebug() << pScanSerialPort->errorString();
-            }
 
-            pScanSerialPort->close();
+#ifndef Q_OS_MAC
+			if(!pScanSerialPort->open(QIODevice::ReadWrite))
+			{
+				qDebug() << "serial prot open fail!";
+				qDebug() << pScanSerialPort->errorString();
+			}
+			pScanSerialPort->close();
+#endif
 
 #ifdef Q_OS_WIN32
             QSet<QString> portsNew;
@@ -597,7 +609,7 @@ void UploadBase::writePro()
             QSet<QString> result;
             int elapsed = 0;
             QString foundPort;
-            while (elapsed < 10000)
+			while (elapsed < 2000)
             {
                 tmp = QextSerialEnumerator::getPorts();
                 foreach (QextPortInfo portInfor, tmp)
@@ -612,11 +624,9 @@ void UploadBase::writePro()
                 }
                 portsOld = portsNew;
 
-                Sleep::sleep(250);
-                elapsed += 250;
+				Sleep::sleep(250);
+				elapsed += 250;
             }
-
-
 #endif
         }
 
