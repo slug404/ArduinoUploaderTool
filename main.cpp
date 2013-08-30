@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-#ifdef QDEBUG_H
+#ifdef USE_DEBUG
     if(QFile::exists("cmd.txt"))
     {
         QFile::remove("cmd.txt");
