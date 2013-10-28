@@ -129,71 +129,71 @@ QSet<QString> UploadBase::getAllChildDirPath(const QString &parentDirPath)
 QString UploadBase::getCompilerCommand(const QString &sketchPath, const QString &cpuType,
                                        const QString &var, const QList<QString> &libPaths, QString workingFrequency, QString workPath)
 {
-    QFileInfo infor(sketchPath);
-    QString suffix = infor.suffix();
-    QString cmd;
+	QFileInfo infor(sketchPath);
+	QString suffix = infor.suffix();
+	QString cmd;
 
-    QString id = QString("-DUSB_VID=null -DUSB_PID=null");
-    {
-        if(infor.baseName() == QFileInfo(codePath_).baseName())
-        {
-            //针对leonardo特殊的处理
-            if ("leonardo" == var)
-            {
-                id = " -DUSB_VID=0x2341 -DUSB_PID=0x8036";
-            }
-            else if ("Micro" == var)
-            {
-                id = " -DUSB_VID=0x2341 -DUSB_PID=0x8037";
-            }
-            else if ("Esplora" == var)
-            {
-                id = " -DUSB_VID=0x2341 -DUSB_PID=0x803C";
-            }
-        }
-    }
-    if("c" == suffix
-            || "C" == suffix)
-    {
-        cmd = QString("%1/avr-gcc -c -g -Os -Wall -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3 -MMD %4 -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency).arg(id);
-    }
-    else if("cpp" == suffix
-            || "CPP" == suffix
-            || "java.exe" == infor.fileName())
-    {
-        cmd = QString("%1/avr-g++ -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3 -MMD %4 -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency).arg(id);
-    }
-    else
-    {
-        return QString();
-    }
+	QString id = QString("-DUSB_VID=null -DUSB_PID=null");
+	{
+		if(infor.baseName() == QFileInfo(codePath_).baseName())
+		{
+			//针对leonardo特殊的处理
+			if ("leonardo" == var)
+			{
+				id = " -DUSB_VID=0x2341 -DUSB_PID=0x8036";
+			}
+			else if ("Micro" == var)
+			{
+				id = " -DUSB_VID=0x2341 -DUSB_PID=0x8037";
+			}
+			else if ("Esplora" == var)
+			{
+				id = " -DUSB_VID=0x2341 -DUSB_PID=0x803C";
+			}
+		}
+	}
+	if("c" == suffix
+			|| "C" == suffix)
+	{
+		cmd = QString("%1/avr-gcc -c -g -Os -Wall -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3 -MMD %4 -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency).arg(id);
+	}
+	else if("cpp" == suffix
+			|| "CPP" == suffix
+			|| "java.exe" == infor.fileName())
+	{
+		cmd = QString("%1/avr-g++ -c -g -Os -Wall -fno-exceptions -ffunction-sections -fdata-sections -mmcu=%2 -DF_CPU=%3 -MMD %4 -DARDUINO=103 ").arg("./Arduino/hardware/tools/avr/bin").arg(cpuType).arg(workingFrequency).arg(id);
+	}
+	else
+	{
+		return QString();
+	}
 
-    cmd += "-I./Arduino/hardware/arduino/cores/arduino ";
-    cmd += "-I./Arduino/hardware/arduino/variants/standard ";
+	cmd += "-I./Arduino/hardware/arduino/cores/arduino ";
+	cmd += "-I./Arduino/hardware/arduino/variants/standard ";
 
-    //加引用路径
-    for(int i = 0; i != libPaths.size(); ++i)
-    {
-        cmd += QString("-I")+libPaths.at(i) + " ";
-    }
-    //这里结构测试的时候再仔细考虑一下
-    if(sketchPath.contains("/")
-            || sketchPath.contains("\\"))
-    {
-        cmd += QString("-I") + QFileInfo(sketchPath).path() + " ";
-    }
-    cmd += QString(sketchPath + " -o "  +workPath + "/" + infor.fileName() + ".o");
-#ifdef QDEBUG_H
-//    QFile file("cmd.txt");
-//    if(!file.open(QFile::Append))
-//    {
-//        qDebug() << "cmd.txt can't open!!";
-//    }
+	//加引用路径
+	for(int i = 0; i != libPaths.size(); ++i)
+	{
+		cmd += QString("-I")+libPaths.at(i) + " ";
+	}
+	//这里结构测试的时候再仔细考虑一下
+	if(sketchPath.contains("/")
+			|| sketchPath.contains("\\"))
+	{
+		cmd += QString("-I") + QFileInfo(sketchPath).path() + " ";
+	}
+	cmd += QString(sketchPath + " -o "  +workPath + "/" + infor.fileName() + ".o");
+#ifdef USE_DEBUG
+	QFile file("cmd.txt");
+	if(!file.open(QFile::Append))
+	{
+		qDebug() << "cmd.txt can't open!!";
+	}
+	file.write(cmd);
+	file.write("\n");
+	file.close();
 #endif
-//    file.write(cmd.toAscii());
-//    file.write("\n");
-//    file.close();
-    return cmd;
+	return cmd;
 }
 
 /**
@@ -561,7 +561,7 @@ void UploadBase::writePro()
 #ifdef Q_OS_WIN32
             QextSerialPort *pScanSerialPort = new QextSerialPort(serialPort_, setting);
             //QextSerialPort *pScanSerialPort = new QextSerialPort(serialPort_, setting);
-#elif defined(Q_OS_MAC)
+#else
 			QString tmpPort = QString("/dev/")+serialPort_;
 			QString cmd = "./reset ";
 			cmd += tmpPort;
@@ -571,9 +571,6 @@ void UploadBase::writePro()
 			pro.start(cmd);
 			pro.waitForFinished(100);
 			pro.close();
-#else
-			QString tmpPort = QString("/dev/")+serialPort_;
-			QextSerialPort *pScanSerialPort = new QextSerialPort(tmpPort, setting, QextSerialPort::Polling);
 #endif
 
 #ifndef Q_OS_MAC

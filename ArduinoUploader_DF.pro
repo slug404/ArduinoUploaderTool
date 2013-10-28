@@ -7,8 +7,11 @@
 QT       += core
 QT       -= gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QMAKE_CXXFLAGS += -std=c++0x
-equals(QT_MAJOR_VERSION, 5): CONFIG += c++11
+greaterThan(QT_MAJOR_VERSION, 4): CONFIG += c++11
+equals(QT_MAJOR_VERSION, 4): QMAKE_CXXFLAGS += -std=c++0x
+
+CONFIG(release, debug|release):DEFINES += USE_RELEASE
+CONFIG(debug, debug|release):DEFINES += USE_DEBUG
 
 TARGET = ArduinoUploader
 TEMPLATE = app
@@ -31,3 +34,19 @@ HEADERS += \
 	Uploader_Linux.h \
 	Uploader_Windows.h \
 	Sleep.h
+
+win32{
+MOC_DIR = _moc
+OBJECTS_DIR = _obj
+RCC_DIR = _rcc
+UI_DIR = _ui
+UI_HEADERS_DIR = _ui
+UI_SOURCES_DIR = _ui
+}else{
+MOC_DIR = .moc
+OBJECTS_DIR = .obj
+RCC_DIR = .rcc
+UI_DIR = .ui
+UI_HEADERS_DIR = .ui
+UI_SOURCES_DIR = .ui
+}
