@@ -18,6 +18,7 @@ TEMPLATE = app
 
 INCLUDEPATH += ./QExtserialport
 include(./QExtserialport/qextserialport.pri)
+include(./NetWork/NetWork.pri)
 
 SOURCES += main.cpp \
 	UploadFactory.cpp \

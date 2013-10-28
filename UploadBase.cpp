@@ -6,10 +6,13 @@
 #include <QRegExp>
 #include <QProcess>
 #include <QCoreApplication>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 #include "Sleep.h"
 #include "Qextserialport/qextserialport.h"
 #include "Qextserialport/qextserialenumerator.h"
+#include "NetWork.h"
 
 /**
  * @brief 构造函数
@@ -28,6 +31,8 @@ UploadBase::UploadBase(const QString &codePath, const QString &serial, int board
     , cmd_("")
     , hexPath_("")
 {
+	pNetWork = new NetWork(this);
+
     scanAllLibraryHeaderFile("./Arduino/libraries");
     scanAllheaderFile("./Arduino/libraries");
 
@@ -189,7 +194,7 @@ QString UploadBase::getCompilerCommand(const QString &sketchPath, const QString 
 	{
 		qDebug() << "cmd.txt can't open!!";
 	}
-	file.write(cmd);
+	file.write(cmd.toUtf8().data());
 	file.write("\n");
 	file.close();
 #endif
@@ -488,7 +493,58 @@ bool UploadBase::copyFile(const QString &srcPath, const QString &desPath)
     desFile.waitForBytesWritten(10);
     desFile.close();
 
-    return true;
+	return true;
+}
+
+QVariantMap UploadBase::getInfor(const QString &infor)
+{
+	QRegExp regExp("error: invalid conversion from '.+' to '.+'");
+
+	QVariantMap map;
+	//编译错误--类型转换错误
+	int pos = infor.indexOf(regExp);
+	if(pos >= 0)
+	{
+		QString tmp = regExp.cap(0).left(regExp.cap(0).indexOf("\n"));
+		qDebug() << "regExp.cap(0) :" << tmp;
+		qDebug() << "regExp.cap(1) :" << regExp.cap(1);
+		qDebug() << "regExp.cap(2) :" << regExp.cap(2);
+
+		map = pNetWork->getGrammaticalError(infor);
+	}
+	else if(infor.contains("no new port found"))
+	{
+		map = pNetWork->getSerialPortError(infor);
+	}
+	else if(infor.contains("avrdude: ser_open(): can't open device"))
+	{//上传错误--端口号错误
+		//对外通知端口号错误
+		map = pNetWork->getSerialPortError("serialport error ,and can't open device");
+	}
+	else if(infor.contains("not in sync"))
+	{//如果猜得没错就是它了
+		 //对外通知板子类型错误
+		map = pNetWork->getBoradError("serialport number error");
+	}
+	else if(infor.contains("bytes of flash verified")
+			&& infor.contains("100%"))
+	{//编译上传成功
+		map = pNetWork->getUploaderSuccess("uploader success!");
+	}
+	else if(infor.contains("Compiliation successful completed"))
+	{
+		map = pNetWork->getCompileSuccess("compiliation successful completed");
+	}
+	else if(infor.contains("error opening port"))
+	{
+		map = pNetWork->getSerialPortError("error opening port");
+	}
+	else
+	{
+		map = pNetWork->getOtherInfor("unkown information");
+	}
+
+	return map;
 }
 
 void UploadBase::prepare()
@@ -854,17 +910,34 @@ void UploadBase::scanAllheaderFile(const QString &path)
 
 void UploadBase::slotReadyReadStandardOutput()
 {
-//	cout << "+++++++++++++++begin std out put++++++++++++++++++\n";
     QString stdOutPut = pExternalProcess_->readAllStandardOutput();
-    cout << stdOutPut.toAscii().data() << endl;
-//	cout << "+++++++++++++++end std out put+++++++++++++++++++\n";
+	cout << stdOutPut.toUtf8().data() << endl;
+
+	QByteArray bytes;
+	QDataStream out(&bytes, QIODevice::WriteOnly);
+
+	out << qint32(0);
+
+	QJsonObject json = QJsonObject::fromVariantMap(getInfor(stdOutPut));
+	qDebug() << json;
+
+	out.device()->seek(0);
+	out << qint32(qint32(bytes.size() - qint32(sizeof(qint32))));
 }
 
 void UploadBase::slotreadyReadStandardError()
 {
-//	cerr << "+++++++++++++++begin std error ++++++++++++++++++\n";
     QString errorString = pExternalProcess_->readAllStandardError();
+	cerr << errorString.toUtf8().data() << endl;
 
-    cerr << errorString.toAscii().data() << endl;
-//	cerr << "+++++++++++++++end std error+++++++++++++++++++\n";
+	QByteArray bytes;
+	QDataStream out(&bytes, QIODevice::WriteOnly);
+
+	out << qint32(0);
+
+	QJsonObject json = QJsonObject::fromVariantMap(getInfor(errorString));
+	qDebug() << json;
+
+	out.device()->seek(0);
+	out << qint32(qint32(bytes.size() - qint32(sizeof(qint32))));
 }

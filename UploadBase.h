@@ -8,6 +8,8 @@
 #include <iostream>
 using namespace std;
 
+class NetWork;
+
 /**
  * @brief 库引用信息
  */
@@ -110,26 +112,35 @@ protected:
     QSet<QString> getAllMatchResults(const QString text, const QString regexp = "\\w+\\.h");
 
     //递归编译指定目录以及其子目录中所有*c,*cpp
-    void compileLibrary(const QString &libraryDirPath, const QString &mcu, const QString &var, const QString &workFrequency);
+	void compileLibrary(const QString &libraryDirPath, const QString &mcu,
+						const QString &var, const QString &workFrequency);
 
     //给QProcess调用
     //编译
     QString getCompilerCommand(const QString &sketchPath, const QString &cpuType,
-                               const QString &var, const QList<QString> &libPaths, QString workingFrequency = "16000000L", QString workPath = "./Temp");
+							   const QString &var, const QList<QString> &libPaths,
+							   QString workingFrequency = "16000000L", QString workPath = "./Temp");
     //链接
-    void linkerCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath = "./Temp");
-    QString create_elf_fileCommand(const QString &filePath, const QString &cpuType, const QString &staticLibraryPath, QString workPath = "./Temp");
-    QString create_eep_fileCommand(const QString &toolPath, const QString &elfPath, const QString &eepPath);
-    QString create_hex_fileCommand(const QString &toolPath, const QString &elfPath, const QString &hexPath);
+	void linkerCommand(const QString &filePath, const QString &cpuType,
+					   const QString &staticLibraryPath, QString workPath = "./Temp");
+	QString create_elf_fileCommand(const QString &filePath, const QString &cpuType,
+								   const QString &staticLibraryPath, QString workPath = "./Temp");
+	QString create_eep_fileCommand(const QString &toolPath, const QString &elfPath,
+								   const QString &eepPath);
+	QString create_hex_fileCommand(const QString &toolPath, const QString &elfPath,
+								   const QString &hexPath);
 
     //上传
-	QString getUploadCommand(const QString &avrdudePath, const QString &configPath, const QString &cpuType,
-							 const QString &serialPort, const QString &baudrate, const QString &hexPath, const QString &protocol);
+	QString getUploadCommand(const QString &avrdudePath, const QString &configPath,
+							 const QString &cpuType,
+							 const QString &serialPort, const QString &baudrate,
+							 const QString &hexPath, const QString &protocol);
     QSet<QString> getAllChildDirPath(const QString &parentDirPath);
 
     //复制库相关,为了防止有同名文件导致的覆盖问题.目前暂时不使用
     void copyDirectory(const QString &srcPath, const QString &desPath);
     bool copyFile(const QString &srcPath, const QString &desPath);
+	QVariantMap getInfor(const QString &infor);
 
     Q_DISABLE_COPY(UploadBase)
 
@@ -137,8 +148,6 @@ protected:
     void prepare(); //! 准备
     void compile(); //! 编译
     void writePro();//! 烧写
-
-
 
 protected:
     //data
@@ -154,6 +163,7 @@ protected:
     QMultiMap<QString, QString> map_headerFile_path_;
     QMap<int, Board> map_boardIndex_infor_;
     QString hexPath_;
+	NetWork *pNetWork;
 };
 
 #endif // UPLOADBASE_H

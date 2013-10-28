@@ -26,8 +26,8 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    if(PARAMER_COUNT == argc)
-    {
+	if(PARAMER_COUNT == argc)
+	{
         //accept
         QString fileName = argv[1];
         QString board = argv[2];
@@ -40,11 +40,11 @@ int main(int argc, char *argv[])
         QSharedPointer<UploadBase> pUploader = UploadFactory::create(UploadFactory::OS_MAC, fileName, serialPort, board.toInt());
 #endif
         pUploader->start();
-    }
-    else
-    {
-        cerr << "paramer conut error" << endl;
-    }
+	}
+	else
+	{
+		cerr << "paramer conut error" << endl;
+	}
 
     return 0;
 }
