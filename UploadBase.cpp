@@ -8,6 +8,7 @@
 #include <QCoreApplication>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QTcpSocket>
 
 #include "Sleep.h"
 #include "Qextserialport/qextserialport.h"
@@ -32,6 +33,7 @@ UploadBase::UploadBase(const QString &codePath, const QString &serial, int board
     , hexPath_("")
 {
 	pNetWork = new NetWork(this);
+	pNetWork->pTcpSocket_->waitForConnected();
 
     scanAllLibraryHeaderFile("./Arduino/libraries");
     scanAllheaderFile("./Arduino/libraries");
@@ -227,9 +229,16 @@ void UploadBase::linkerCommand(const QString &filePath, const QString &cpuType, 
     //调用QProcess
     if(pExternalProcess_)
     {
-        pExternalProcess_->execute(elf);//生成elf文件
-        pExternalProcess_->execute(eep);//生成eep文件
-        pExternalProcess_->execute(hex);//生成hex文件
+		//这里需要用同步以保证结果正确
+//        pExternalProcess_->execute(elf);//生成elf文件
+//        pExternalProcess_->execute(eep);//生成eep文件
+//        pExternalProcess_->execute(hex);//生成hex文件
+		pExternalProcess_->start(elf);//生成elf文件
+		pExternalProcess_->waitForFinished();
+		pExternalProcess_->start(eep);//生成eep文件
+		pExternalProcess_->waitForFinished();
+		pExternalProcess_->start(hex);//生成hex文件
+		pExternalProcess_->waitForFinished();
 
         if(QFile::exists(hexPath))
         {
@@ -373,7 +382,9 @@ void UploadBase::compileLibrary(const QString &libraryDirPath, const QString &mc
         //编译本文件
         QString cmd = getCompilerCommand(filePath, mcu, var, libPaths.toList());
         //qDebug() << cmd;
-        pExternalProcess_->execute(cmd);
+		//pExternalProcess_->execute(cmd);
+		pExternalProcess_->start(cmd);
+		pExternalProcess_->waitForFinished();
         alreadyCompile_.clear();
     }
 
@@ -625,7 +636,7 @@ void UploadBase::writePro()
 			//QProcess::execute(cmd);
 			QProcess pro;
 			pro.start(cmd);
-			pro.waitForFinished(100);
+			pro.waitForFinished();
 			pro.close();
 #endif
 
@@ -911,33 +922,81 @@ void UploadBase::scanAllheaderFile(const QString &path)
 void UploadBase::slotReadyReadStandardOutput()
 {
     QString stdOutPut = pExternalProcess_->readAllStandardOutput();
-	cout << stdOutPut.toUtf8().data() << endl;
+	//cout << stdOutPut.toUtf8().data() << endl;
 
 	QByteArray bytes;
 	QDataStream out(&bytes, QIODevice::WriteOnly);
 
 	out << qint32(0);
 
-	QJsonObject json = QJsonObject::fromVariantMap(getInfor(stdOutPut));
-	qDebug() << json;
+	{
+		QJsonDocument jsonDoc = QJsonDocument::fromVariant(getInfor(stdOutPut));
+		out << jsonDoc.toJson();
+	}
 
 	out.device()->seek(0);
-	out << qint32(qint32(bytes.size() - qint32(sizeof(qint32))));
+	out << qint32(qint32(bytes.size()) - qint32(sizeof(qint32)));
+
+	if(pNetWork->pTcpSocket_->waitForConnected())
+	{
+		qDebug() << "waitForConnected() = true";
+#ifdef USE_DEBUG
+	pNetWork->pFile_->write("waitForConnected() = true");
+#endif
+	}
+	else
+	{
+		qDebug() << "waitForConnected() = false";
+#ifdef USE_DEBUG
+	pNetWork->pFile_->write("waitForConnected() = false");
+#endif
+	}
+	pNetWork->pTcpSocket_->write(bytes);
+	pNetWork->pTcpSocket_->waitForBytesWritten();
+#ifdef USE_DEBUG
+	pNetWork->pFile_->write("send data to server");
+#endif
+	qDebug() << "发送数据";
 }
 
 void UploadBase::slotreadyReadStandardError()
 {
     QString errorString = pExternalProcess_->readAllStandardError();
-	cerr << errorString.toUtf8().data() << endl;
+	//cerr << errorString.toUtf8().data() << endl;
 
 	QByteArray bytes;
 	QDataStream out(&bytes, QIODevice::WriteOnly);
 
 	out << qint32(0);
 
-	QJsonObject json = QJsonObject::fromVariantMap(getInfor(errorString));
-	qDebug() << json;
+	{
+		QJsonDocument jsonDoc = QJsonDocument::fromVariant(getInfor(errorString));
+		out << jsonDoc.toJson();
+	}
 
 	out.device()->seek(0);
-	out << qint32(qint32(bytes.size() - qint32(sizeof(qint32))));
+	out << qint32(qint32(bytes.size()) - qint32(sizeof(qint32)));
+
+	if(pNetWork->pTcpSocket_->waitForConnected())
+	{
+		qDebug() << "waitForConnected() = true";
+#ifdef USE_DEBUG
+	pNetWork->pFile_->write("waitForConnected() = true");
+#endif
+	}
+	else
+	{
+		qDebug() << "waitForConnected() = false";
+#ifdef USE_DEBUG
+	pNetWork->pFile_->write("waitForConnected() = false");
+#endif
+	}
+	pNetWork->pTcpSocket_->write(bytes);
+#ifdef USE_DEBUG
+	pNetWork->pFile_->write("send data to server");
+#endif
+
+	pNetWork->pTcpSocket_->write(bytes);
+	pNetWork->pTcpSocket_->waitForBytesWritten();
+	qDebug() << "发送数据";
 }

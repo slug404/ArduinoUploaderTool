@@ -3,8 +3,8 @@
 
 #include <QObject>
 #include <QVariantMap>
-
-class QTcpSocket;
+#include <QTcpSocket>
+#include <QFile>
 
 class NetWork : public QObject
 {
@@ -51,8 +51,12 @@ public:
 private:
 	void initData();
 
-private:
+private slots:
+	void slotConnected();
+
+public:
 	QTcpSocket *pTcpSocket_;
+	QFile *pFile_;
 };
 
 #endif // NETWORK_H
